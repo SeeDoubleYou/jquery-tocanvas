@@ -1,18 +1,18 @@
 {
-	"name": "jquery-boilerplate",
-	"version": "3.5.0",
-	"homepage": "http://jqueryboilerplate.com",
+	"name": "jquery-tocanvas",
+	"version": "0.0.0",
+	"homepage": "http://seedoubleyou.nl",
 	"authors": [
-		"Zeno Rocha <hi@zenorocha.com>"
+		"Cees-Willem Hofstede <ceeswillem@gmail.com>"
 	],
-	"description": "A jump-start for jQuery plugins development.",
-	"main": "src/jquery.boilerplate.js",
+	"description": "A jquery plugin to overlay any img with a canvas to add effects to it",
+	"main": "src/jquery.tocanvas.js",
 	"keywords": [
 		"jquery",
 		"plugin",
-		"boilerplate",
+		"tocanvas",
 		"jquery-plugin",
-		"jquery-boilerplate"
+		"jquery-tocanvas"
 	],
 	"license": "MIT"
 }

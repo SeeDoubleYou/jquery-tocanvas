@@ -1,3 +1,11 @@
+/*
+ *  jquery-tocanvas - v0.1.0
+ *  A jquery plugin to overlay any img with a canvas to add effects to it
+ *  http://seedoubleyou.nl
+ *
+ *  Made by Cees-Willem Hofstede
+ *  Under MIT License
+ */
 // the semi-colon before function invocation is a safety net against concatenated
 // scripts and/or other plugins which may not be closed properly.
 ;(function ( $, window, document, undefined ) {
@@ -23,10 +31,16 @@
 
     // The actual plugin constructor
     function Plugin ( element, options ) {
-        this.element = $(element);
+        this.element = element;
+        this.$element = $(this.element);
         this.canvas = $('<canvas>');
+        this.$canvas = $(this.canvas);
         this.context;
         this.wrapper = $('<div>');
+        this.$wrapper = $(this.wrapper);
+        this.imgData;
+        this.pixels;
+
         // jQuery has an extend method which merges the contents of two or
         // more objects, storing the result in the first object. The first object
         // is generally empty as we don't want to alter the default options for
@@ -40,11 +54,11 @@
     // Avoid Plugin.prototype conflicts
     $.extend(Plugin.prototype, {
         init: function () {
-            var tc = this
-                tc.w = tc.element.width()
-                tc.h = tc.element.height()
-            ;
-            tc.wrapper
+            var tc = this;
+            tc.w = tc.$element.width();
+            tc.h = tc.$element.height();
+            
+            tc.$wrapper
                 .addClass('tc_wrapper')
                 .css({
                     position: 'relative',
@@ -52,7 +66,8 @@
                     height: tc.h
                 })
             ;
-            tc.canvas
+            
+            tc.$canvas
                 .addClass('tc_canvas')
                 .css({
                     position: 'absolute',
@@ -68,37 +83,47 @@
                     height: tc.h
                 });
             ;
-            tc.element
+            
+            tc.$element
                 .addClass('tc_image')   
-                .wrap(tc.wrapper)
-                .before(tc.canvas)
+                .wrap(tc.$wrapper)
+                .before(tc.$canvas)
             ;
-
-            //     TEMP
-            // \/\/\/\/\/\/
             
             tc.context = this.canvas.get(0).getContext('2d');
             var imageObj = new Image();
             imageObj.onload = function() {
                 tc.context.drawImage(imageObj, 0, 0, tc.w, tc.h);
-                grayscale();
-            };
-            imageObj.src = this.element.attr('src');
+                tc.imgd     = tc.context.getImageData(0, 0, tc.w, tc.h);
+                tc.pixels   = tc.imgd.data;
 
-            // for now, lets do some grayscaling
-            function grayscale() { 
-                var imgd = tc.context.getImageData(0, 0, tc.w, tc.h);
-                var pix = imgd.data;
-                for (var i = 0, n = pix.length; i < n; i += 4) {
-                    var grayscale = pix[i  ] * .3 + pix[i+1] * .59 + pix[i+2] * .11;
-                    pix[i  ] = grayscale;   // red
-                    pix[i+1] = grayscale;   // green
-                    pix[i+2] = grayscale;   // blue
-                // alpha
-                }
-                tc.context.putImageData(imgd, 0, 0);
+                //tc.grayscale();
+                tc.sepia();
+
+                tc.context.putImageData(tc.imgd, 0, 0);
+            };
+            imageObj.src = this.$element.attr('src');
+        },
+
+        grayscale: function() {
+            for (var i = 0, n = this.pixels.length; i < n; i += 4) {
+                var grayscale = this.pixels[i  ] * .3 + this.pixels[i+1] * .59 + this.pixels[i+2] * .11;
+                this.pixels[i  ] = grayscale;   // red
+                this.pixels[i+1] = grayscale;   // green
+                this.pixels[i+2] = grayscale;   // blue
             }
         },
+
+        sepia: function() {
+            for (var i = 0; i < this.pixels.length; i += 4) {
+                var r = this.pixels[i];
+                var g = this.pixels[i + 1];
+                var b = this.pixels[i + 2];
+                this.pixels[i]     = (r * 0.393)+(g * 0.769)+(b * 0.189); // red
+                this.pixels[i + 1] = (r * 0.349)+(g * 0.686)+(b * 0.168); // green
+                this.pixels[i + 2] = (r * 0.272)+(g * 0.534)+(b * 0.131); // blue
+            }
+        }
     });
 
     // A really lightweight plugin wrapper around the constructor,

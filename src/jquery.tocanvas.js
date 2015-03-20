@@ -24,7 +24,8 @@
     // Create the defaults once
     var pluginName = "toCanvas",
         defaults = {
-            opacity: 0.8,
+            opacity: 1,
+            hoverOpacity: 1,
             zIndex: 10
         }
     ;
@@ -57,7 +58,7 @@
             var tc = this;
             tc.w = tc.$element.width();
             tc.h = tc.$element.height();
-            
+
             tc.$wrapper
                 .addClass('tc_wrapper')
                 .css({
@@ -66,7 +67,7 @@
                     height: tc.h
                 })
             ;
-            
+
             tc.$canvas
                 .addClass('tc_canvas')
                 .css({
@@ -76,20 +77,29 @@
                     zIndex: tc.settings.zIndex,
                     opacity: tc.settings.opacity
                 })
+                .hover(function() {
+                    $(this).css({
+                        opacity: tc.settings.hoverOpacity
+                    })
+                }, function() {
+                    $(this).css({
+                        opacity: tc.settings.opacity
+                    })
+                })
                 .attr({
                     // width and height need to be set as attributes
                     // so that the coordinate system is set correctly
-                    width: tc.w, 
+                    width: tc.w,
                     height: tc.h
                 });
             ;
-            
+
             tc.$element
-                .addClass('tc_image')   
+                .addClass('tc_image')
                 .wrap(tc.$wrapper)
                 .before(tc.$canvas)
             ;
-            
+
             tc.context = this.canvas.get(0).getContext('2d');
             var imageObj = new Image();
             imageObj.onload = function() {

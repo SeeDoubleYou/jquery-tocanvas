@@ -6,6 +6,14 @@
  *  Made by Cees-Willem Hofstede
  *  Under MIT License
  */
+/*
+ *  jquery-tocanvas - v0.1.0
+ *  A jquery plugin to overlay any img with a canvas to add effects to it
+ *  http://seedoubleyou.nl
+ *
+ *  Made by Cees-Willem Hofstede
+ *  Under MIT License
+ */
 // the semi-colon before function invocation is a safety net against concatenated
 // scripts and/or other plugins which may not be closed properly.
 ;(function ( $, window, document, undefined ) {
@@ -34,10 +42,10 @@
     function Plugin ( element, options ) {
         this.element = element;
         this.$element = $(this.element);
-        this.canvas = $('<canvas>');
+        this.canvas = $("<canvas>");
         this.$canvas = $(this.canvas);
         this.context;
-        this.wrapper = $('<div>');
+        this.wrapper = $("<div>");
         this.$wrapper = $(this.wrapper);
         this.imgData;
         this.pixels;
@@ -60,18 +68,18 @@
             tc.h = tc.$element.height();
 
             tc.$wrapper
-                .addClass('tc_wrapper')
+                .addClass("tc_wrapper")
                 .css({
-                    position: 'relative',
+                    position: "relative",
                     width: tc.w,
                     height: tc.h
                 })
             ;
 
             tc.$canvas
-                .addClass('tc_canvas')
+                .addClass("tc_canvas")
                 .css({
-                    position: 'absolute',
+                    position: "absolute",
                     top: 0,
                     left: 0,
                     zIndex: tc.settings.zIndex,
@@ -80,27 +88,27 @@
                 .hover(function() {
                     $(this).css({
                         opacity: tc.settings.hoverOpacity
-                    })
+                    });
                 }, function() {
                     $(this).css({
                         opacity: tc.settings.opacity
-                    })
+                    });
                 })
                 .attr({
                     // width and height need to be set as attributes
                     // so that the coordinate system is set correctly
                     width: tc.w,
                     height: tc.h
-                });
+                })
             ;
 
             tc.$element
-                .addClass('tc_image')
+                .addClass("tc_image")
                 .wrap(tc.$wrapper)
                 .before(tc.$canvas)
             ;
 
-            tc.context = this.canvas.get(0).getContext('2d');
+            tc.context = this.canvas.get(0).getContext("2d");
             var imageObj = new Image();
             imageObj.onload = function() {
                 tc.context.drawImage(imageObj, 0, 0, tc.w, tc.h);
@@ -112,12 +120,12 @@
 
                 tc.context.putImageData(tc.imgd, 0, 0);
             };
-            imageObj.src = this.$element.attr('src');
+            imageObj.src = this.$element.attr("src");
         },
 
         grayscale: function() {
             for (var i = 0, n = this.pixels.length; i < n; i += 4) {
-                var grayscale = this.pixels[i  ] * .3 + this.pixels[i+1] * .59 + this.pixels[i+2] * .11;
+                var grayscale = this.pixels[i  ] * 0.3 + this.pixels[i+1] * 0.59 + this.pixels[i+2] * 0.11;
                 this.pixels[i  ] = grayscale;   // red
                 this.pixels[i+1] = grayscale;   // green
                 this.pixels[i+2] = grayscale;   // blue

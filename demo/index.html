@@ -6,7 +6,7 @@
 		<script src="../src/jquery.toCanvas.js"></script>
 		<style>
 			canvas {
-				transition: all 1s;
+				transition: all 0.2s;
 			}
 		</style>
 	</head>
@@ -15,9 +15,18 @@
 		<img src="ny_view.jpg" class="toCanvas"></div>
 		<script>
 			$(function() {
+				var lomoLight = [
+					{ brightness: 10 },
+					{ saturation: 20 },
+					{ gamma: 1.4 },
+					{ vignette: { opacity: 0.8 } },
+					{ brightness: 5 }
+				];
+
 				$(".toCanvas").toCanvas({
 					opacity: 1,
-					hoverOpacity: 0.3
+					hoverOpacity: 0,
+					process: lomoLight,
 				});
 			});
 		</script>

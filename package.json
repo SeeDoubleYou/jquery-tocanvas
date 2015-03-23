@@ -1,6 +1,6 @@
 {
   "name": "jquery-tocanvas",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A jquery plugin to overlay any img with a canvas to add effects to it",
   "keywords": [
     "jquery-plugin",

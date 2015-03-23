@@ -34,7 +34,8 @@
         defaults = {
             opacity: 1,
             hoverOpacity: 1,
-            zIndex: 10
+            zIndex: 10,
+            process: {},
         }
     ;
 
@@ -114,33 +115,277 @@
                 tc.context.drawImage(imageObj, 0, 0, tc.w, tc.h);
                 tc.imgd     = tc.context.getImageData(0, 0, tc.w, tc.h);
                 tc.pixels   = tc.imgd.data;
+                tc.nrPixels = tc.pixels.length;
 
-                //tc.grayscale();
-                tc.sepia();
+                tc.context.putImageData(tc.imgd, 0, 0);
+                $.each(tc.settings.process, function(index, modifierObj) {
+                    var modifier = Object.keys(modifierObj)[0];
+                    var options = modifierObj[modifier];
+                    tc[modifier](options);
+                });
 
                 tc.context.putImageData(tc.imgd, 0, 0);
             };
             imageObj.src = this.$element.attr("src");
         },
 
-        grayscale: function() {
-            for (var i = 0, n = this.pixels.length; i < n; i += 4) {
-                var grayscale = this.pixels[i  ] * 0.3 + this.pixels[i+1] * 0.59 + this.pixels[i+2] * 0.11;
-                this.pixels[i  ] = grayscale;   // red
-                this.pixels[i+1] = grayscale;   // green
-                this.pixels[i+2] = grayscale;   // blue
+        /**
+         * Process a callback for each pixel.
+         * We loop over all pixels and call the callback for each
+         * 
+         * 
+         * @param  {Function} callback The callback must return an array [r, g, b, a]
+         * @return {obj}      this
+         */
+        process: function(callback) {
+            for (var x = 0; x < this.w; x++) {
+                for (var y = 0; y < this.h; y++) {
+                    var i = 4*(y*this.w + x);
+                    var r = this.pixels[i],
+                        g = this.pixels[i+1],
+                        b = this.pixels[i+2],
+                        a = this.pixels[i+3]
+                    ;
+                    var processed  = callback(r, g, b, a, x, y);
+                    this.pixels[i]   = processed[0];
+                    this.pixels[i+1] = processed[1];
+                    this.pixels[i+2] = processed[2];
+                    this.pixels[i+3] = processed[3]; 
+                }    
             }
+            return this;
         },
 
+        /**
+         * --------------------------------------------------------------------------------
+         *            EFFECTS
+         * -------------------------------------------------------------------------------- 
+         */
+
+        /**
+         * Convert pixels to a pure gray value
+         * @return {array} r, g, b, a
+         */
+        grayscale: function() {
+            return this.process(function(r, g, b, a) {
+                var grayscale = r * 0.3 + g * 0.59 + b * 0.11;
+                return [
+                    grayscale, 
+                    grayscale, 
+                    grayscale, 
+                    a
+                ];
+            });
+        },
+
+        /**
+         * Convert pixeld to sepia color
+         * @return {array} r, g, b, a
+         */
         sepia: function() {
-            for (var i = 0; i < this.pixels.length; i += 4) {
-                var r = this.pixels[i];
-                var g = this.pixels[i + 1];
-                var b = this.pixels[i + 2];
-                this.pixels[i]     = (r * 0.393)+(g * 0.769)+(b * 0.189); // red
-                this.pixels[i + 1] = (r * 0.349)+(g * 0.686)+(b * 0.168); // green
-                this.pixels[i + 2] = (r * 0.272)+(g * 0.534)+(b * 0.131); // blue
+            return this.process(function(r, g, b, a) {
+                return [
+                    (r * 0.393)+(g * 0.769)+(b * 0.189), 
+                    (r * 0.349)+(g * 0.686)+(b * 0.168), 
+                    (r * 0.272)+(g * 0.534)+(b * 0.131), 
+                    a
+                ];
+            });
+        },
+
+        /**
+         * Invert r, g and by by subtracting original values from 255
+         * @return {array} r, g, b, a
+         */
+        invert: function() {
+             return this.process(function(r, g, b, a) {
+                return [
+                    255 - r,
+                    255 - g,
+                    255 - b,
+                    a
+                ];
+            });
+        },
+
+        vignette: function(options) {
+            options = $.extend( {}, {
+                size: 0.5,
+                opacity: 1
+            }, options );
+
+            console.log(options.opacity);
+
+            var outerRadius = Math.sqrt( Math.pow(this.w / 2, 2) + Math.pow(this.h / 2, 2) );
+            var gradient = this.context.createRadialGradient(this.w/2, this.h/2, 0, this.w/2, this.h/2, outerRadius);
+            
+            // write current data to image so we can overlay the vignette
+            this.context.putImageData(this.imgd, 0, 0);
+            this.context.globalCompositeOperation = "source-over";
+            gradient.addColorStop(0, "rgba(0,0,0,0)");
+            gradient.addColorStop(options.size, "rgba(0,0,0,0)");
+            gradient.addColorStop(1, "rgba(0,0,0,"+ options.opacity +")");
+            this.context.fillStyle = gradient;
+            this.context.fillRect(0, 0, this.w, this.h);
+
+            // make sure other effect get the updated data
+            this.imgd   = this.context.getImageData(0, 0, this.w, this.h);
+            this.pixels = this.imgd.data;
+        },
+
+
+        /**
+         * --------------------------------------------------------------------------------
+         *            ADJUSTMENTS
+         * -------------------------------------------------------------------------------- 
+         */
+        threshold: function(threshold) {
+            threshold = threshold || 127;
+            return this.process(function(r, g, b, a) {
+                var v = (0.2126*r + 0.7152*g + 0.0722*b >= threshold) ? 255 : 0;
+                return [
+                    v,
+                    v,
+                    v,
+                    a
+                ];
+            });
+        },
+
+        brightness: function(brightness) {
+            if (brightness === undefined) {
+                $.error("brightness adjustment not set");
             }
+
+            return this.process(function(r, g, b, a) {
+                return [
+                    r + brightness,
+                    g + brightness,
+                    b + brightness,
+                    a
+                ];
+            });
+        },
+
+        saturation: function(saturation) {
+            if (saturation === undefined) {
+                $.error("saturation adjustment not set");
+            }
+
+            var tc = this;
+            return this.process(function(r, g, b, a) {
+                var hsl = tc.rgb2hsl(r, g, b);
+
+                hsl.s = Math.min(Math.max(saturation/100, 0), 1);
+                var rgb = tc.hsl2rgb(hsl.h, hsl.s, hsl.l);
+                return [
+                    rgb.r,
+                    rgb.g,
+                    rgb.b,
+                    a
+                ];
+            });
+        },
+
+        contrast: function(contrast) {
+            if (contrast === undefined) {
+                $.error("contrast adjustment not set");
+            }
+
+            var tc = this;
+            var level = Math.pow((contrast + 100) / 100, 2);
+            return this.process(function(r, g, b, a) {
+                return [
+                    ((r / 255 - 0.5) * level + 0.5) * 255, 
+                    ((g / 255 - 0.5) * level + 0.5) * 255, 
+                    ((b / 255 - 0.5) * level + 0.5) * 255, 
+                    a
+                ];
+            });
+        },
+
+        gamma: function(gamma) {
+            if (gamma === undefined) {
+                $.error("gamma adjustment not set");
+            }
+
+            return this.process(function(r, g, b, a) {
+                return [
+                    r * gamma, 
+                    g * gamma, 
+                    b * gamma, 
+                    a
+                ];
+            });
+        },
+
+
+        /**
+         * --------------------------------------------------------------------------------
+         *            HELPERS
+         * -------------------------------------------------------------------------------- 
+         */
+        
+        rgb2hsl: function(r, g, b) {
+            r /= 255;
+            g /= 255;
+            b /= 255;
+            var max = Math.max(r, g, b);
+            var min = Math.min(r, g, b);
+            var h, s, l = (max + min) / 2;
+
+            if (max === min) {
+                h = s = 0;
+            } else {
+                var d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                switch (max) {
+                    case r:
+                        h = (g - b) / d + (g < b ? 6 : 0);
+                        break;
+
+                    case g:
+                        h = (b - r) / d + 2;
+                        break;
+
+                    case b:
+                        h = (r - g) / d + 4;
+                        break;
+                }
+            }
+            h /= 6;
+            return {
+                h: h,
+                s: s,
+                l: l
+            };
+        },
+
+        hsl2rgb: function(h, s, l) {
+            var r, g, b;
+            if (s === 0) {
+                r = g = b = l; //gray value
+            } else {
+                var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+                var p = 2 * l - q;
+                r = this.hue2rgb(p, q, h + 1 / 3);
+                g = this.hue2rgb(p, q, h);
+                b = this.hue2rgb(p, q, h - 1 / 3);
+            }
+            return {
+                r: r * 255,
+                g: g * 255,
+                b: b * 255
+            };
+        },
+
+        hue2rgb: function(p, q, t) {
+            if (t < 0) t += 1;
+            if (t > 1) t -= 1;
+            if (t < 1 / 6) return p + (q - p) * 6 * t;
+            if (t < 1 / 2) return q;
+            if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+            return p;
         }
     });
 

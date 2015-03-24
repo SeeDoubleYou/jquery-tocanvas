@@ -214,8 +214,6 @@
                 opacity: 1
             }, options );
 
-            console.log(options.opacity);
-
             var outerRadius = Math.sqrt( Math.pow(this.w / 2, 2) + Math.pow(this.h / 2, 2) );
             var gradient = this.context.createRadialGradient(this.w/2, this.h/2, 0, this.w/2, this.h/2, outerRadius);
             
@@ -392,6 +390,10 @@
     // A really lightweight plugin wrapper around the constructor,
     // preventing against multiple instantiations
     $.fn[ pluginName ] = function ( options ) {
+        var canvas2DSupported = !!window.CanvasRenderingContext2D;
+        if(!canvas2DSupported)
+            return;
+
         return this.each(function() {
             if ( !$.data( this, "plugin_" + pluginName ) ) {
                 $.data( this, "plugin_" + pluginName, new Plugin( this, options ) );

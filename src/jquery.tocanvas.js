@@ -71,9 +71,10 @@
             tc.$wrapper
                 .addClass("tc_wrapper")
                 .css({
-                    height: tc.h
+                    display: "inline-block",
+                    height: tc.h,
                     position: "relative",
-                    width: tc.w,
+                    width: tc.w
                 })
             ;
 
@@ -81,10 +82,10 @@
                 .addClass("tc_canvas")
                 .css({
                     left: 0,
-                    opacity: tc.settings.opacity
+                    opacity: tc.settings.opacity,
                     position: "absolute",
                     top: 0,
-                    zIndex: tc.settings.zIndex,
+                    zIndex: tc.settings.zIndex
                 })
                 .hover(function() {
                     $(this).css({
@@ -98,8 +99,8 @@
                 .attr({
                     // width and height need to be set as attributes
                     // so that the coordinate system is set correctly
-                    height: tc.h
-                    width: tc.w,
+                    height: tc.h,
+                    width: tc.w
                 })
             ;
 

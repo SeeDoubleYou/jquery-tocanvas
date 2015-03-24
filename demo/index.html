@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<title>jQuery toCanvas Plugin</title>
-		<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 		<script src="../src/jquery.toCanvas.js"></script>
 		<style>
 			canvas {
@@ -21,7 +21,7 @@
 					{ saturation: 20 },
 					{ gamma: 1.4 },
 					{ vignette: { opacity: 0.8 } },
-					{ brightness: 5 },
+					{ brightness: 5 }
 				];
 
 				$(".toCanvas").toCanvas({
@@ -34,14 +34,14 @@
 						{ vignette: { 
 							opacity: 1,
 							size: 0.2  
-						} },
-					],
+						} }
+					]
 				});
 
 				$(".toCanvas-lomo").toCanvas({
 					opacity: 1,
 					hoverOpacity: 0,
-					process: lomoLight,
+					process: lomoLight
 				});
 			});
 		</script>

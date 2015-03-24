@@ -35,7 +35,7 @@
             opacity: 1,
             hoverOpacity: 1,
             zIndex: 10,
-            process: {},
+            process: {}
         }
     ;
 
@@ -392,8 +392,9 @@
     // preventing against multiple instantiations
     $.fn[ pluginName ] = function ( options ) {
         var canvas2DSupported = !!window.CanvasRenderingContext2D;
-        if(!canvas2DSupported)
+        if(!canvas2DSupported) {
             return;
+        }
 
         return this.each(function() {
             if ( !$.data( this, "plugin_" + pluginName ) ) {

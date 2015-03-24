@@ -43,7 +43,7 @@
             opacity: 1,
             hoverOpacity: 1,
             zIndex: 10,
-            process: {},
+            process: {}
         }
     ;
 
@@ -79,20 +79,21 @@
             tc.$wrapper
                 .addClass("tc_wrapper")
                 .css({
+                    display: "inline-block",
+                    height: tc.h,
                     position: "relative",
-                    width: tc.w,
-                    height: tc.h
+                    width: tc.w
                 })
             ;
 
             tc.$canvas
                 .addClass("tc_canvas")
                 .css({
+                    left: 0,
+                    opacity: tc.settings.opacity,
                     position: "absolute",
                     top: 0,
-                    left: 0,
-                    zIndex: tc.settings.zIndex,
-                    opacity: tc.settings.opacity
+                    zIndex: tc.settings.zIndex
                 })
                 .hover(function() {
                     $(this).css({
@@ -106,8 +107,8 @@
                 .attr({
                     // width and height need to be set as attributes
                     // so that the coordinate system is set correctly
-                    width: tc.w,
-                    height: tc.h
+                    height: tc.h,
+                    width: tc.w
                 })
             ;
 
@@ -221,8 +222,6 @@
                 size: 0.5,
                 opacity: 1
             }, options );
-
-            console.log(options.opacity);
 
             var outerRadius = Math.sqrt( Math.pow(this.w / 2, 2) + Math.pow(this.h / 2, 2) );
             var gradient = this.context.createRadialGradient(this.w/2, this.h/2, 0, this.w/2, this.h/2, outerRadius);
@@ -400,6 +399,11 @@
     // A really lightweight plugin wrapper around the constructor,
     // preventing against multiple instantiations
     $.fn[ pluginName ] = function ( options ) {
+        var canvas2DSupported = !!window.CanvasRenderingContext2D;
+        if(!canvas2DSupported) {
+            return;
+        }
+
         return this.each(function() {
             if ( !$.data( this, "plugin_" + pluginName ) ) {
                 $.data( this, "plugin_" + pluginName, new Plugin( this, options ) );

@@ -32,10 +32,11 @@
     // Create the defaults once
     var pluginName = "toCanvas",
         defaults = {
-            opacity: 1,
+            framerate: 0,
             hoverOpacity: 1,
-            zIndex: 10,
-            process: {}
+            opacity: 1,
+            process: {},
+            zIndex: 10
         }
     ;
 
@@ -48,8 +49,10 @@
         this.context;
         this.wrapper = $("<div>");
         this.$wrapper = $(this.wrapper);
+        this.imageObj;
         this.imgData;
         this.pixels;
+        this.renderCount = 0;
 
         // jQuery has an extend method which merges the contents of two or
         // more objects, storing the result in the first object. The first object
@@ -111,23 +114,48 @@
             ;
 
             tc.context = this.canvas.get(0).getContext("2d");
-            var imageObj = new Image();
-            imageObj.onload = function() {
-                tc.context.drawImage(imageObj, 0, 0, tc.w, tc.h);
-                tc.imgd     = tc.context.getImageData(0, 0, tc.w, tc.h);
-                tc.pixels   = tc.imgd.data;
-                tc.nrPixels = tc.pixels.length;
-
-                tc.context.putImageData(tc.imgd, 0, 0);
-                $.each(tc.settings.process, function(index, modifierObj) {
-                    var modifier = Object.keys(modifierObj)[0];
-                    var options = modifierObj[modifier];
-                    tc[modifier](options);
+            if(tc.$element.is("img")) {
+                tc.imageObj = new Image();
+                tc.imageObj.onload = function() {
+                    tc.render();
+                };
+                tc.imageObj.src = this.$element.attr("src");
+            }
+            else if(tc.$element.is("video")) {
+                tc.imageObj = tc.element;
+                tc.$element.on("play", function() {
+                    tc.render();
                 });
+                tc.$element.trigger("play");
+            }
+            else {
+                return; //incorrect source
+            }
+        },
 
-                tc.context.putImageData(tc.imgd, 0, 0);
-            };
-            imageObj.src = this.$element.attr("src");
+        render: function() {
+            var tc = this;
+            tc.context.drawImage(tc.imageObj, 0, 0, tc.w, tc.h);
+            tc.imgd     = tc.context.getImageData(0, 0, tc.w, tc.h);
+            tc.pixels   = tc.imgd.data;
+            tc.nrPixels = tc.pixels.length;
+
+            tc.context.putImageData(tc.imgd, 0, 0);
+            $.each(tc.settings.process, function(index, modifierObj) {
+                var modifier = Object.keys(modifierObj)[0];
+                var options = modifierObj[modifier];
+                tc[modifier](options);
+            });
+
+            tc.context.putImageData(tc.imgd, 0, 0);
+
+            tc.renderCount++;
+            
+            if(tc.settings.framerate > 0) {
+                window.setTimeout(function() {
+                    tc.render();
+                }, 1000/tc.settings.framerate);
+            }
         },
 
         /**

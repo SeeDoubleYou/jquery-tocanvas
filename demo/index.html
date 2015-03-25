@@ -11,9 +11,17 @@
 		</style>
 	</head>
 	<body>
-		<img src="ny_view.jpg"></div>
-		<img src="ny_view.jpg" class="toCanvas"></div>
-		<img src="ny_view.jpg" class="toCanvas-lomo"></div>
+		<img src="ny_view.jpg" />
+		<img src="ny_view.jpg" class="toCanvas" />
+		<img src="ny_view.jpg" class="toCanvas-lomo" />
+
+		<video class="toCanvas-video" width="640" height="360" controls="" autoplay="">
+			<!-- MP4 must be first for iPad! -->
+			<source src="big_buck_bunny.mp4" type="video/mp4"><!-- Safari / iOS, IE9 -->
+			<source src="big_buck_bunny.webm" type="video/webm"><!-- Chrome10+, Ffx4+, Opera10.6+ -->
+			<source src="big_buck_bunny.ogv" type="video/ogg"><!-- Firefox3.6+ / Opera 10.5+ -->
+		</video>
+
 		<script>
 			$(function() {
 				var lomoLight = [
@@ -42,6 +50,19 @@
 					opacity: 1,
 					hoverOpacity: 0,
 					process: lomoLight
+				});
+
+				$('.toCanvas-video').toCanvas({
+					framerate: 30,
+					opacity: 1,
+					hoverOpacity: 0,
+					process: [
+						{ invert: true },
+						{ vignette: { 
+							opacity: 1,
+							size: 0.2  
+						} }
+					]
 				});
 			});
 		</script>

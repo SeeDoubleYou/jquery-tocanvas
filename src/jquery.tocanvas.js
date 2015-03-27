@@ -150,7 +150,7 @@
             tc.context.putImageData(tc.imgd, 0, 0);
 
             tc.renderCount++;
-            
+
             if(tc.settings.framerate > 0) {
                 window.setTimeout(function() {
                     tc.render();
@@ -161,8 +161,7 @@
         /**
          * Process a callback for each pixel.
          * We loop over all pixels and call the callback for each
-         * 
-         * 
+         *
          * @param  {Function} callback The callback must return an array [r, g, b, a]
          * @return {obj}      this
          */
@@ -179,8 +178,8 @@
                     this.pixels[i]   = processed[0];
                     this.pixels[i+1] = processed[1];
                     this.pixels[i+2] = processed[2];
-                    this.pixels[i+3] = processed[3]; 
-                }    
+                    this.pixels[i+3] = processed[3];
+                }
             }
             return this;
         },
@@ -188,7 +187,7 @@
         /**
          * --------------------------------------------------------------------------------
          *            EFFECTS
-         * -------------------------------------------------------------------------------- 
+         * --------------------------------------------------------------------------------
          */
 
         /**
@@ -199,9 +198,9 @@
             return this.process(function(r, g, b, a) {
                 var grayscale = r * 0.3 + g * 0.59 + b * 0.11;
                 return [
-                    grayscale, 
-                    grayscale, 
-                    grayscale, 
+                    grayscale,
+                    grayscale,
+                    grayscale,
                     a
                 ];
             });
@@ -214,9 +213,9 @@
         sepia: function() {
             return this.process(function(r, g, b, a) {
                 return [
-                    (r * 0.393)+(g * 0.769)+(b * 0.189), 
-                    (r * 0.349)+(g * 0.686)+(b * 0.168), 
-                    (r * 0.272)+(g * 0.534)+(b * 0.131), 
+                    (r * 0.393)+(g * 0.769)+(b * 0.189),
+                    (r * 0.349)+(g * 0.686)+(b * 0.168),
+                    (r * 0.272)+(g * 0.534)+(b * 0.131),
                     a
                 ];
             });
@@ -245,7 +244,7 @@
 
             var outerRadius = Math.sqrt( Math.pow(this.w / 2, 2) + Math.pow(this.h / 2, 2) );
             var gradient = this.context.createRadialGradient(this.w/2, this.h/2, 0, this.w/2, this.h/2, outerRadius);
-            
+
             // write current data to image so we can overlay the vignette
             this.context.putImageData(this.imgd, 0, 0);
             this.context.globalCompositeOperation = "source-over";
@@ -264,7 +263,7 @@
         /**
          * --------------------------------------------------------------------------------
          *            ADJUSTMENTS
-         * -------------------------------------------------------------------------------- 
+         * --------------------------------------------------------------------------------
          */
         threshold: function(threshold) {
             threshold = threshold || 127;
@@ -319,18 +318,16 @@
                 $.error("contrast adjustment not set");
             }
 
-            var tc = this;
             var level = Math.pow((contrast + 100) / 100, 2);
             return this.process(function(r, g, b, a) {
                 return [
-                    ((r / 255 - 0.5) * level + 0.5) * 255, 
-                    ((g / 255 - 0.5) * level + 0.5) * 255, 
-                    ((b / 255 - 0.5) * level + 0.5) * 255, 
+                    ((r / 255 - 0.5) * level + 0.5) * 255,
+                    ((g / 255 - 0.5) * level + 0.5) * 255,
+                    ((b / 255 - 0.5) * level + 0.5) * 255,
                     a
                 ];
             });
         },
-
         gamma: function(gamma) {
             if (gamma === undefined) {
                 $.error("gamma adjustment not set");
@@ -338,9 +335,9 @@
 
             return this.process(function(r, g, b, a) {
                 return [
-                    r * gamma, 
-                    g * gamma, 
-                    b * gamma, 
+                    r * gamma,
+                    g * gamma,
+                    b * gamma,
                     a
                 ];
             });
@@ -350,9 +347,9 @@
         /**
          * --------------------------------------------------------------------------------
          *            HELPERS
-         * -------------------------------------------------------------------------------- 
+         * --------------------------------------------------------------------------------
          */
-        
+
         rgb2hsl: function(r, g, b) {
             r /= 255;
             g /= 255;
@@ -407,11 +404,11 @@
         },
 
         hue2rgb: function(p, q, t) {
-            if (t < 0) t += 1;
-            if (t > 1) t -= 1;
-            if (t < 1 / 6) return p + (q - p) * 6 * t;
-            if (t < 1 / 2) return q;
-            if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+            if (t < 0) { t += 1; }
+            if (t > 1) { t -= 1; }
+            if (t < 1 / 6) { return p + (q - p) * 6 * t; }
+            if (t < 1 / 2) { return q; }
+            if (t < 2 / 3) { return p + (q - p) * (2 / 3 - t) * 6; }
             return p;
         }
     });

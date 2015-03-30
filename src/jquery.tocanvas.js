@@ -35,6 +35,7 @@
             framerate: 0,
             hoverOpacity: 1,
             opacity: 1,
+            overlay: true,
             process: {},
             zIndex: 10
         }
@@ -46,12 +47,8 @@
         this.$element = $(this.element);
         this.canvas = $("<canvas>");
         this.$canvas = $(this.canvas);
-        this.context;
         this.wrapper = $("<div>");
         this.$wrapper = $(this.wrapper);
-        this.imageObj;
-        this.imgData;
-        this.pixels;
         this.renderCount = 0;
 
         // jQuery has an extend method which merges the contents of two or
@@ -68,6 +65,29 @@
     $.extend(Plugin.prototype, {
         init: function () {
             var tc = this;
+            if(tc.$element.is("img")) {
+                tc.imageObj = new Image();
+                tc.imageObj.onload = function() {
+                    tc.setup();
+                    tc.render();
+                };
+                tc.imageObj.src = this.$element.attr("src");
+            }
+            else if(tc.$element.is("video")) {
+                tc.imageObj = tc.element;
+                tc.$element.on("play", function() {
+                    tc.setup();
+                    tc.render();
+                });
+                tc.$element.trigger("play");
+            }
+            else {
+                return; //incorrect source
+            }
+        },
+
+        setup: function() {
+            var tc = this;
             tc.w = tc.$element.width();
             tc.h = tc.$element.height();
 
@@ -81,15 +101,18 @@
                 })
             ;
 
+            var canvasCSS = tc.settings.overlay ? {
+                left: 0,
+                opacity: tc.settings.opacity,
+                position: "absolute",
+                top: 0,
+                zIndex: tc.settings.zIndex
+            } : {
+                opacity: tc.settings.opacity,
+            };
             tc.$canvas
                 .addClass("tc_canvas")
-                .css({
-                    left: 0,
-                    opacity: tc.settings.opacity,
-                    position: "absolute",
-                    top: 0,
-                    zIndex: tc.settings.zIndex
-                })
+                .css(canvasCSS)
                 .hover(function() {
                     $(this).css({
                         opacity: tc.settings.hoverOpacity
@@ -106,48 +129,50 @@
                     width: tc.w
                 })
             ;
+            
+            tc.$element.addClass("tc_image");
 
-            tc.$element
-                .addClass("tc_image")
-                .wrap(tc.$wrapper)
-                .before(tc.$canvas)
-            ;
+            if(tc.settings.overlay) {
+                tc.$element.wrap(tc.$wrapper);
+                tc.$element.before(tc.$canvas);
+            } else {
+                tc.$element.after(tc.$canvas);
+            }
 
             tc.context = this.canvas.get(0).getContext("2d");
-            if(tc.$element.is("img")) {
-                tc.imageObj = new Image();
-                tc.imageObj.onload = function() {
-                    tc.render();
-                };
-                tc.imageObj.src = this.$element.attr("src");
-            }
-            else if(tc.$element.is("video")) {
-                tc.imageObj = tc.element;
-                tc.$element.on("play", function() {
-                    tc.render();
-                });
-                tc.$element.trigger("play");
-            }
-            else {
-                return; //incorrect source
-            }
         },
 
+        /**
+         * Render all effects, overlays, filters, etc.
+         * @return {[type]} [description]
+         */
         render: function() {
             var tc = this;
-            tc.context.drawImage(tc.imageObj, 0, 0, tc.w, tc.h);
-            tc.imgd     = tc.context.getImageData(0, 0, tc.w, tc.h);
-            tc.pixels   = tc.imgd.data;
-            tc.nrPixels = tc.pixels.length;
+            
+            if(tc.imageObj.paused || tc.imageObj.ended) {
+                return false;
+            }
 
-            tc.context.putImageData(tc.imgd, 0, 0);
+            tc.context.drawImage(tc.imageObj, 0, 0, tc.w, tc.h); // draw image to canvas
+            tc.imgdIn   = tc.context.getImageData(0, 0, tc.w, tc.h); // get data from 2D context  
+            tc.pixelsIn = tc.imgdIn.data;
+            tc.nrPixels = tc.pixelsIn.length;  
+
             $.each(tc.settings.process, function(index, modifierObj) {
+                // we make a copy so that effects use 'in' during calculation
+                // and 'out' when writing data
+                
+                tc.imgdOut   = tc.context.getImageData(0, 0, tc.w, tc.h); // get data from 2D context  
+                tc.pixelsOut = tc.imgdOut.data;
+
                 var modifier = Object.keys(modifierObj)[0];
                 var options = modifierObj[modifier];
                 tc[modifier](options);
+
+                tc.putImageData();
             });
 
-            tc.context.putImageData(tc.imgd, 0, 0);
+           
 
             tc.renderCount++;
             
@@ -158,10 +183,17 @@
             }
         },
 
+        putImageData: function() {
+            this.context.putImageData(this.imgdOut, 0, 0);
+            this.imgdIn   = this.imgdOut;
+            this.imgdIn   = this.context.getImageData(0, 0, this.w, this.h); // get data from 2D context
+            this.pixelsIn = this.imgdIn.data;
+            this.nrPixels = this.pixelsIn.length;
+        },
+
         /**
          * Process a callback for each pixel.
          * We loop over all pixels and call the callback for each
-         * 
          * 
          * @param  {Function} callback The callback must return an array [r, g, b, a]
          * @return {obj}      this
@@ -170,16 +202,16 @@
             for (var x = 0; x < this.w; x++) {
                 for (var y = 0; y < this.h; y++) {
                     var i = 4*(y*this.w + x);
-                    var r = this.pixels[i],
-                        g = this.pixels[i+1],
-                        b = this.pixels[i+2],
-                        a = this.pixels[i+3]
+                    var r = this.pixelsIn[i],
+                        g = this.pixelsIn[i+1],
+                        b = this.pixelsIn[i+2],
+                        a = this.pixelsIn[i+3]
                     ;
-                    var processed  = callback(r, g, b, a, x, y);
-                    this.pixels[i]   = processed[0];
-                    this.pixels[i+1] = processed[1];
-                    this.pixels[i+2] = processed[2];
-                    this.pixels[i+3] = processed[3]; 
+                    var processed = callback(r, g, b, a, x, y, i);
+                    this.pixelsOut[i]   = processed[0];
+                    this.pixelsOut[i+1] = processed[1];
+                    this.pixelsOut[i+2] = processed[2];
+                    this.pixelsOut[i+3] = processed[3]; 
                 }    
             }
             return this;
@@ -237,6 +269,151 @@
             });
         },
 
+        edges: function() {
+            var tc = this;
+            var rowShift = tc.w*4;
+            return tc.process(function(r, g, b, a, x, y, i) {
+                r = 127 + 2*r - tc.pixels[i + 4] - tc.pixels[i   + rowShift];
+                g = 127 + 2*g - tc.pixels[i + 5] - tc.pixels[i+1 + rowShift];
+                b = 127 + 2*b - tc.pixels[i + 6] - tc.pixels[i+2 + rowShift];
+           
+                return [r, g, b, a];
+            });
+        },
+
+        noise: function(amount) {
+            amount = amount || 10;
+            return this.process(function(r, g, b, a) {
+                return [
+                    r + (0.5 - Math.random()) * amount, 
+                    g + (0.5 - Math.random()) * amount, 
+                    b + (0.5 - Math.random()) * amount, 
+                    a
+                ];
+            });
+        },
+
+        /**
+        * --------------------------------------------------------------------------------
+        *           CONVULUTION FILTERS
+        * -------------------------------------------------------------------------------- 
+        */
+        
+        blur: function() {
+            var tc = this;
+            return tc.process(function(r, g, b, a, x, y, i) {
+                var rgb = tc.convolutionFilter([
+                    [0.1, 0.1, 0.1],
+                    [0.1, 0.2, 0.1],
+                    [0.1, 0.1, 0.1]
+                ], i);
+                return [rgb[0], rgb[1], rgb[2], a];
+            });
+        },
+
+        boxBlur: function(radius) {
+            radius = radius || 3;
+            var tc = this;
+            var len = radius * radius;
+            var val = 1 / len;
+            var filter = [];
+
+            for(var r = 0; r < radius; r++) {
+                var row = [];
+                for(var c = 0; c < radius; c++) {
+                    row.push(val);
+                }
+                filter.push(row);   
+            }
+
+            return tc.process(function(r, g, b, a, x, y, i) {
+                var rgb = tc.convolutionFilter(filter, i);
+                return [rgb[0], rgb[1], rgb[2], a];
+            });
+        },
+
+        sharpen: function() {
+            var tc = this;
+            return tc.process(function(r, g, b, a, x, y, i) {
+                var rgb = tc.convolutionFilter([
+                    [ 0, -1,  0],
+                    [-1,  5, -1],
+                    [ 0, -1,  0]
+                ], i);
+                return [rgb[0], rgb[1], rgb[2], a];
+            });
+        },
+
+        emboss: function() {
+            var tc = this;
+            return tc.process(function(r, g, b, a, x, y, i) {
+                var rgb = tc.convolutionFilter([
+                    [2,  0,  0],
+                    [0, -1,  0],
+                    [0,  0, -1]
+                ], i, {
+                    offset: 127
+                });
+                return [rgb[0], rgb[1], rgb[2], a];
+            });  
+        },
+
+        laplace: function() {
+            var tc = this;
+            return tc.process(function(r, g, b, a, x, y, i) {
+                var rgb = tc.convolutionFilter([
+                    [0,  1, 0],
+                    [1, -4, 1],
+                    [0,  1, 0]
+                ], i);
+                return [rgb[0], rgb[1], rgb[2], a];
+            });
+        },
+
+        sobel: function() {
+            this.sobelVertical();
+            this.putImageData();
+            return this.sobelHorizontal();
+        },
+
+        sobelVertical: function() {
+            var tc = this;
+            return tc.process(function(r, g, b, a, x, y, i) {
+                var rgb = tc.convolutionFilter([
+                    [-1, 0, 1],
+                    [-2, 0, 2],
+                    [-1, 0, 1]
+                ], i);
+                r = rgb[0];
+                g = rgb[1];
+                b = rgb[2];
+
+                return [rgb[0], rgb[1], rgb[2], a];
+            });
+        },
+
+        sobelHorizontal: function() {
+            var tc = this;
+            return tc.process(function(r, g, b, a, x, y, i) {
+                var rgb = tc.convolutionFilter([
+                    [-1, -2, -1],
+                    [ 0,  0,  0],
+                    [ 1,  2,  1]
+                ], i);
+                r = rgb[0];
+                g = rgb[1];
+                b = rgb[2];
+  
+                return [rgb[0], rgb[1], rgb[2], a];
+            });
+        },
+
+        /**
+        * --------------------------------------------------------------------------------
+        *            OVERLAYS
+        * -------------------------------------------------------------------------------- 
+        */
+
         vignette: function(options) {
             options = $.extend( {}, {
                 size: 0.5,
@@ -247,7 +424,7 @@
             var gradient = this.context.createRadialGradient(this.w/2, this.h/2, 0, this.w/2, this.h/2, outerRadius);
             
             // write current data to image so we can overlay the vignette
-            this.context.putImageData(this.imgd, 0, 0);
+            this.context.putImageData(this.imgdOut, 0, 0);
             this.context.globalCompositeOperation = "source-over";
             gradient.addColorStop(0, "rgba(0,0,0,0)");
             gradient.addColorStop(options.size, "rgba(0,0,0,0)");
@@ -256,8 +433,8 @@
             this.context.fillRect(0, 0, this.w, this.h);
 
             // make sure other effect get the updated data
-            this.imgd   = this.context.getImageData(0, 0, this.w, this.h);
-            this.pixels = this.imgd.data;
+            this.imgdOut   = this.context.getImageData(0, 0, this.w, this.h);
+            this.pixelsOut = this.imgdOut.data;
         },
 
 
@@ -319,7 +496,6 @@
                 $.error("contrast adjustment not set");
             }
 
-            var tc = this;
             var level = Math.pow((contrast + 100) / 100, 2);
             return this.process(function(r, g, b, a) {
                 return [
@@ -407,13 +583,56 @@
         },
 
         hue2rgb: function(p, q, t) {
-            if (t < 0) t += 1;
-            if (t > 1) t -= 1;
-            if (t < 1 / 6) return p + (q - p) * 6 * t;
-            if (t < 1 / 2) return q;
-            if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+            if (t < 0) { t += 1; }
+            if (t > 1) { t -= 1; }
+            if (t < 1 / 6) { return p + (q - p) * 6 * t; }
+            if (t < 1 / 2) { return q; }
+            if (t < 2 / 3) { return p + (q - p) * (2 / 3 - t) * 6; }
             return p;
-        }
+        },
+
+        convolutionFilter: function(filter, i, options) {
+            if (filter === undefined) {
+                $.error("filter not set");
+            }
+            options = $.extend({}, {
+                channels: "rgb",
+                offset: 0
+            }, options);
+
+            var tc = this;
+
+            var updateR = (/r/i.test(options.channels));
+            var updateG = (/g/i.test(options.channels));
+            var updateB = (/b/i.test(options.channels));
+
+            var rows = filter.length;    // odd
+            var cols = filter[0].length; // odd
+
+            var rm = Math.floor(rows/2); // center of row (current pixel)
+            var cm = Math.floor(cols/2); // center of column (current pixel)
+
+            var nR = updateR ? 0 : tc.pixelsIn[i  ],
+                nG = updateG ? 0 : tc.pixelsIn[i+1],
+                nB = updateB ? 0 : tc.pixelsIn[i+2]
+            ;
+            var rowShift = tc.w*4;
+
+            for(var r = 0; r < rows; r++) {
+                var ri = rowShift * (r < rm ? -1 : (r > rm ? +1 : 0));
+                
+                for(var c = 0; c < cols; c++) {
+                    var cd = Math.abs(c-cm);
+                    var ci = 4 * (c < cm ? -cd : (c > cm ? +cd : 0));
+
+                    if(updateR) { nR += (filter[r][c] * tc.pixelsIn[i   + ri + ci]); }
+                    if(updateG) { nG += (filter[r][c] * tc.pixelsIn[i+1 + ri + ci]); }
+                    if(updateB) { nB += (filter[r][c] * tc.pixelsIn[i+2 + ri + ci]); }
+                }     
+            }
+            return [options.offset + nR, options.offset + nG, options.offset + nB];
+        },
+
     });
 
     // A really lightweight plugin wrapper around the constructor,

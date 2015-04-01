@@ -427,32 +427,56 @@
             });
         },
 
-        brightness: function(brightness) {
-            if (brightness === undefined) {
-                $.error("brightness adjustment not set");
-            }
-
-            return this.process(function(r, g, b, a) {
-                return [
-                    r + brightness,
-                    g + brightness,
-                    b + brightness,
-                    a
-                ];
-            });
+        hue: function(options) {
+            this.hslUpdate('h', options);
         },
 
-        saturation: function(saturation) {
-            if (saturation === undefined) {
-                $.error("saturation adjustment not set");
+        saturation: function(options) {
+            this.hslUpdate('s', options);
+        },
+
+        brightness: function(options) {
+            this.lightness(options);
+        },
+
+        lightness: function(options) {
+            this.hslUpdate('l', options);
+        },
+
+        hslUpdate: function(axis, options) {
+            var tc = this;
+            options = $.extend( {}, {
+                value: 0,
+                colorize: false
+            }, options );
+
+            if (options.value === 0 && options.colorize !== true) {
+                return false;
             }
 
-            var tc = this;
+            var max = axis == "h" ? 360 : 100;
+
             return this.process(function(r, g, b, a) {
                 var hsl = tc.rgb2hsl(r, g, b);
 
-                hsl.s = Math.min(Math.max(saturation/100, 0), 1);
+                if(options.colorize) {
+                    // colorize means, set the value to exaclty the value
+                    hsl[axis] = Math.min(Math.max(options.value/max, 0), 1);
+                } else {
+                    // add the value to the current value
+                    if(axis == "h") {
+                        hsl[axis] = (hsl[axis]*360 + options.value) % max;
+                        if(hsl[axis] < 0) {
+                            hsl[axis] = max - hsl[axis];
+                        }
+                        hsl[axis] /= max;
+                    } else {
+                        hsl[axis] = Math.min(Math.max(hsl[axis] + options.value/max, 0), 1);
+                    }
+                }
+
                 var rgb = tc.hsl2rgb(hsl.h, hsl.s, hsl.l);
+                
                 return [
                     rgb.r,
                     rgb.g,

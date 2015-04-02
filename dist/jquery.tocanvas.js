@@ -364,6 +364,36 @@
             return this.convolutionFilter(filter, options);
         },
 
+        gaussianBlur: function(options) {
+            options = $.extend({}, {
+                radius: 3,
+            }, options);
+
+            var radius = options.radius;
+            var size = 2*radius+1;
+            var sigma = radius/2;
+            var sum = 0.0; // For accumulating the filter values
+            var filter = [];
+            for (var x = 0; x < size; ++x) {
+                var row = []; 
+                for (var y = 0; y < size; ++y) {
+                    var col = this.gaussian(x, radius, sigma) * this.gaussian(y, radius, sigma);
+                    row.push(col);
+                    sum += col;
+                }
+                filter.push(row);
+            }
+
+            // Normalize the filter
+            for (var x2 = 0; x2 < size; ++x2) {
+                for (var y2 = 0; y2 < size; ++y2) {
+                    filter[x2][y2] /= sum;
+                }
+            }
+
+            return this.convolutionFilter(filter, options);
+        },
+
         sharpen: function(options) {
             return this.convolutionFilter([
                 [ 0, -1,  0],
@@ -412,6 +442,54 @@
                 [ 0,  0,  0],
                 [ 1,  2,  1]
             ], options);
+        },
+
+        convolutionFilter: function(filter, options) {
+            if (filter === undefined) {
+                $.error("filter not set");
+            }
+            options = $.extend({}, {
+                updateR: true,
+                updateG: true,
+                updateB: true,
+                offset: 0,
+            }, options);
+
+            var tc = this;
+
+            var rows = filter.length;    // odd
+            var cols = filter[0].length; // odd
+
+            var rm = Math.floor(rows/2); // center of row (current pixel)
+            var cm = Math.floor(cols/2); // center of column (current pixel)
+
+            return tc.process(function(r, g, b, a, x, y, i) {
+                
+                var nR = options.updateR ? 0 : tc.pixelsIn[i  ],
+                    nG = options.updateG ? 0 : tc.pixelsIn[i+1],
+                    nB = options.updateB ? 0 : tc.pixelsIn[i+2]
+                ;
+
+                for(var row = 0; row < rows; row++) {
+                    var rd = Math.abs(row-rm);
+                    var ri = (row < rm ? -rd : (row > rm ? +rd : 0));
+
+                    var nY = Math.max(Math.min(y+ri, tc.h-1), 0);
+                    
+                    for(var col = 0; col < cols; col++) {
+                        var cd = Math.abs(col-cm);
+                        var ci = (col < cm ? -cd : (col > cm ? +cd : 0));
+
+                        var nX = Math.max(Math.min(x+ci, tc.w-1), 0);
+                        var nI = 4*(nY * tc.w + nX);
+
+                        if(options.updateR) { nR += (filter[row][col] * tc.pixelsIn[nI  ]); }
+                        if(options.updateG) { nG += (filter[row][col] * tc.pixelsIn[nI+1]); }
+                        if(options.updateB) { nB += (filter[row][col] * tc.pixelsIn[nI+2]); }
+                    }     
+                }
+                return [options.offset + nR, options.offset + nG, options.offset + nB, a];
+            });
         },
 
         /**
@@ -621,54 +699,9 @@
             return p;
         },
 
-        convolutionFilter: function(filter, options) {
-            if (filter === undefined) {
-                $.error("filter not set");
-            }
-            options = $.extend({}, {
-                updateR: true,
-                updateG: true,
-                updateB: true,
-                offset: 0,
-            }, options);
-
-            var tc = this;
-
-            var rows = filter.length;    // odd
-            var cols = filter[0].length; // odd
-
-            var rm = Math.floor(rows/2); // center of row (current pixel)
-            var cm = Math.floor(cols/2); // center of column (current pixel)
-
-            return tc.process(function(r, g, b, a, x, y, i) {
-                
-                var nR = options.updateR ? 0 : tc.pixelsIn[i  ],
-                    nG = options.updateG ? 0 : tc.pixelsIn[i+1],
-                    nB = options.updateB ? 0 : tc.pixelsIn[i+2]
-                ;
-
-                for(var row = 0; row < rows; row++) {
-                    var rd = Math.abs(row-rm);
-                    var ri = (row < rm ? -rd : (row > rm ? +rd : 0));
-
-                    var nY = Math.max(Math.min(y+ri, tc.h-1), 0);
-                    
-                    for(var col = 0; col < cols; col++) {
-                        var cd = Math.abs(col-cm);
-                        var ci = (col < cm ? -cd : (col > cm ? +cd : 0));
-
-                        var nX = Math.max(Math.min(x+ci, tc.w-1), 0);
-                        var nI = 4*(nY * tc.w + nX);
-
-                        if(options.updateR) { nR += (filter[row][col] * tc.pixelsIn[nI  ]); }
-                        if(options.updateG) { nG += (filter[row][col] * tc.pixelsIn[nI+1]); }
-                        if(options.updateB) { nB += (filter[row][col] * tc.pixelsIn[nI+2]); }
-                    }     
-                }
-                return [options.offset + nR, options.offset + nG, options.offset + nB, a];
-            });
-        },
-
+        gaussian: function(x, mu, sigma) {
+            return Math.exp( -(((x-mu)/(sigma))*((x-mu)/(sigma)))/2.0 );
+        },   
     });
 
     // A really lightweight plugin wrapper around the constructor,

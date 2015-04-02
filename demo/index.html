@@ -38,15 +38,29 @@
 					opacity: 1,
 					hoverOpacity: 0,
 					process: [
-						{ hue: { value: 5 } },
-						{ saturation: { value: -20, colorize: false } },
-						{ vignette: { 
-							opacity: 0.5,
-							size: 0.2  
-						} },
-						{ contrast: 10 }
+						// { convolutionFilter: [
+						// 	[1/9, 0, 0, 0, 0, 0, 0, 0, 0],
+						//     [0, 1/9, 0, 0, 0, 0, 0, 0, 0],
+						//     [0, 0, 1/9, 0, 0, 0, 0, 0, 0],
+						//     [0, 0, 0, 1/9, 0, 0, 0, 0, 0],
+						//     [0, 0, 0, 0, 1/9, 0, 0, 0, 0],
+						//     [0, 0, 0, 0, 0, 1/9, 0, 0, 0],
+						//     [0, 0, 0, 0, 0, 0, 1/9, 0, 0],
+						//     [0, 0, 0, 0, 0, 0, 0, 1/9, 0],
+						//     [0, 0, 0, 0, 0, 0, 0, 0, 1/9]
+						// ] }
+						// { grayscale: {} },
+						// { sobel: {} }
+						// { hue: { value: 5 } },
+						// { saturation: { value: -20, colorize: false } },
+						// { vignette: { 
+						// 	opacity: 0.5,
+						// 	size: 0.2  
+						// } },
+						// { contrast: 10 }
 						// { pixelate: 4.5 },
 						// { boxBlur: { radius: 10 } },
+						{ gaussianBlur: { radius: 50 } },
 					]
 				});
 

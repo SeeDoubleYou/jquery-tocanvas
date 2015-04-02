@@ -27,11 +27,11 @@
 		<script>
 			$(function() {
 				var lomoLight = [
-					{ brightness: 10 },
-					{ saturation: 20 },
-					{ gamma: 1.4 },
+					{ brightness: { value: -5 } },
+					{ saturation: { value: 20 } },
+					{ gamma: { value: 1.4 } },
 					{ vignette: { opacity: 0.8 } },
-					{ brightness: 5 }
+					{ brightness: { value: 5 } }
 				];
 
 				$(".toCanvas-tmp").toCanvas({
@@ -60,7 +60,7 @@
 						// { contrast: 10 }
 						// { pixelate: 4.5 },
 						// { boxBlur: { radius: 10 } },
-						{ gaussianBlur: { radius: 50 } },
+						{ sharpen: { opacity: 0.5 } },
 					]
 				});
 
@@ -68,9 +68,9 @@
 					opacity: 1,
 					hoverOpacity: 0,
 					process: [
-						{ gamma: 1.4 },
-						{ invert: true },
-						{ brightness: -10 },
+						{ gamma: { value: 1.4 } },
+						{ invert: {} },
+						{ brightness: { value: -10 } },
 						{ vignette: { 
 							opacity: 1,
 							size: 0.2  

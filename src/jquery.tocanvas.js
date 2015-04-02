@@ -198,7 +198,11 @@
          * @param  {Function} callback The callback must return an array [r, g, b, a]
          * @return {obj}      this
          */
-        process: function(callback) {
+        process: function(callback, options) {
+            options = $.extend({}, {
+                opacity: 1,
+            }, options);
+
             for (var x = 0; x < this.w; x++) {
                 for (var y = 0; y < this.h; y++) {
                     var i = 4*(y*this.w + x);
@@ -211,7 +215,7 @@
                     this.pixelsOut[i]   = processed[0];
                     this.pixelsOut[i+1] = processed[1];
                     this.pixelsOut[i+2] = processed[2];
-                    this.pixelsOut[i+3] = processed[3]; 
+                    this.pixelsOut[i+3] = options.opacity * processed[3]; 
                 }    
             }
             return this;
@@ -227,7 +231,7 @@
          * Convert pixels to a pure gray value
          * @return {array} r, g, b, a
          */
-        grayscale: function() {
+        grayscale: function(options) {
             return this.process(function(r, g, b, a) {
                 var grayscale = r * 0.3 + g * 0.59 + b * 0.11;
                 return [
@@ -236,14 +240,14 @@
                     grayscale, 
                     a
                 ];
-            });
+            }, options);
         },
 
         /**
          * Convert pixeld to sepia color
          * @return {array} r, g, b, a
          */
-        sepia: function() {
+        sepia: function(options) {
             return this.process(function(r, g, b, a) {
                 return [
                     (r * 0.393)+(g * 0.769)+(b * 0.189), 
@@ -251,14 +255,14 @@
                     (r * 0.272)+(g * 0.534)+(b * 0.131), 
                     a
                 ];
-            });
+            }, options);
         },
 
         /**
          * Invert r, g and by by subtracting original values from 255
          * @return {array} r, g, b, a
          */
-        invert: function() {
+        invert: function(options) {
              return this.process(function(r, g, b, a) {
                 return [
                     255 - r,
@@ -266,10 +270,10 @@
                     255 - b,
                     a
                 ];
-            });
+            }, options);
         },
 
-        edges: function() {
+        edges: function(options) {
             var tc = this;
             var rowShift = tc.w*4;
             return tc.process(function(r, g, b, a, x, y, i) {
@@ -278,24 +282,31 @@
                 b = 127 + 2*b - tc.pixels[i + 6] - tc.pixels[i+2 + rowShift];
            
                 return [r, g, b, a];
-            });
+            }, options);
         },
 
-        noise: function(amount) {
-            amount = amount || 10;
+        noise: function(options) {
+            options = $.extend({}, {
+                amount: 10,
+            }, options);
             return this.process(function(r, g, b, a) {
                 return [
-                    r + (0.5 - Math.random()) * amount, 
-                    g + (0.5 - Math.random()) * amount, 
-                    b + (0.5 - Math.random()) * amount, 
+                    r + (0.5 - Math.random()) * options.amount, 
+                    g + (0.5 - Math.random()) * options.amount, 
+                    b + (0.5 - Math.random()) * options.amount, 
                     a
                 ];
-            });
+            }, options);
         },
 
-        pixelate: function(blockSize) {
+        pixelate: function(options) {
             var tc = this;
-            blockSize = blockSize || 100;
+
+            options = $.extend({}, {
+                blockSize: 100,
+            }, options);
+
+            blockSize = options.blockSize;
             blockSize = 1/blockSize;
 
             var w = tc.w * blockSize,
@@ -387,11 +398,13 @@
         },
 
         sharpen: function(options) {
-            return this.convolutionFilter([
-                [ 0, -1,  0],
-                [-1,  5, -1],
-                [ 0, -1,  0]
-            ], options);
+            return this.convolutionFilter($.extend({}, {
+                filter: [
+                    [ 0, -1,  0],
+                    [-1,  5, -1],
+                    [ 0, -1,  0]
+                ]
+            }, options));
         },
 
         emboss: function(options) {
@@ -399,19 +412,23 @@
                 offset: 127
             }, options);
 
-            return this.convolutionFilter([
-                [2,  0,  0],
-                [0, -1,  0],
-                [0,  0, -1]
-            ], options);
+            return this.convolutionFilter($.extend({}, {
+                filter: [
+                    [2,  0,  0],
+                    [0, -1,  0],
+                    [0,  0, -1]
+                ]
+            }, options));
         },
 
         laplace: function(options) {
-            return this.convolutionFilter([
-                [0,  1, 0],
-                [1, -4, 1],
-                [0,  1, 0]
-            ], options);
+            return this.convolutionFilter($.extend({}, {
+                filter: [
+                    [0,  1, 0],
+                    [1, -4, 1],
+                    [0,  1, 0]
+                ]
+            }, options));
         },
 
         sobel: function(options) {
@@ -421,31 +438,35 @@
         },
 
         sobelVertical: function(options) {
-            return this.convolutionFilter([
-                [-1, 0, 1],
-                [-2, 0, 2],
-                [-1, 0, 1]
-            ], options);
+            return this.convolutionFilter($.extend({}, {
+                filter: [
+                    [-1, 0, 1],
+                    [-2, 0, 2],
+                    [-1, 0, 1]
+                ]
+            }, options));
         },
 
         sobelHorizontal: function(options) {
-            return this.convolutionFilter([
-                [-1, -2, -1],
-                [ 0,  0,  0],
-                [ 1,  2,  1]
-            ], options);
+            return this.convolutionFilter($.extend({}, {
+                filter: [
+                    [-1, -2, -1],
+                    [ 0,  0,  0],
+                    [ 1,  2,  1]
+                ]
+            }, options));
         },
 
-        convolutionFilter: function(filter, options) {
-            if (filter === undefined) {
-                $.error("filter not set");
-            }
+        convolutionFilter: function(options) {
             options = $.extend({}, {
                 updateR: true,
                 updateG: true,
                 updateB: true,
                 offset: 0,
+                filter: [1]
             }, options);
+
+            var filter = options.filter;
 
             var tc = this;
 
@@ -481,7 +502,7 @@
                     }     
                 }
                 return [options.offset + nR, options.offset + nG, options.offset + nB, a];
-            });
+            }, options);
         },
 
         /**
@@ -519,17 +540,20 @@
          *            ADJUSTMENTS
          * -------------------------------------------------------------------------------- 
          */
-        threshold: function(threshold) {
-            threshold = threshold || 127;
+        threshold: function(options) {
+            options = $.extend({}, {
+                threshold: 127,
+            }, options);
+
             return this.process(function(r, g, b, a) {
-                var v = (0.2126*r + 0.7152*g + 0.0722*b >= threshold) ? 255 : 0;
+                var v = (0.2126*r + 0.7152*g + 0.0722*b >= options.threshold) ? 255 : 0;
                 return [
                     v,
                     v,
                     v,
                     a
                 ];
-            });
+            }, options);
         },
 
         hue: function(options) {
@@ -588,15 +612,15 @@
                     rgb.b,
                     a
                 ];
-            });
+            }, options);
         },
 
-        contrast: function(contrast) {
-            if (contrast === undefined) {
-                $.error("contrast adjustment not set");
-            }
+        contrast: function(options) {
+            options = $.extend({}, {
+                value: 10,
+            }, options);
 
-            var level = Math.pow((contrast + 100) / 100, 2);
+            var level = Math.pow((options.value + 100) / 100, 2);
             return this.process(function(r, g, b, a) {
                 return [
                     ((r / 255 - 0.5) * level + 0.5) * 255, 
@@ -604,22 +628,22 @@
                     ((b / 255 - 0.5) * level + 0.5) * 255, 
                     a
                 ];
-            });
+            }, options);
         },
 
-        gamma: function(gamma) {
-            if (gamma === undefined) {
-                $.error("gamma adjustment not set");
-            }
+        gamma: function(options) {
+            options = $.extend({}, {
+                value: 1.5,
+            }, options);
 
             return this.process(function(r, g, b, a) {
                 return [
-                    r * gamma, 
-                    g * gamma, 
-                    b * gamma, 
+                    r * options.value, 
+                    g * options.value, 
+                    b * options.value, 
                     a
                 ];
-            });
+            }, options);
         },
 
 

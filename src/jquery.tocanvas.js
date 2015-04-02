@@ -45,8 +45,8 @@
     function Plugin ( element, options ) {
         this.element = element;
         this.$element = $(this.element);
-        this.canvas = $("<canvas>");
-        this.$canvas = $(this.canvas);
+        this.$canvas = $("<canvas>");
+        this.canvas = this.$canvas.get(0);
         this.wrapper = $("<div>");
         this.$wrapper = $(this.wrapper);
         this.renderCount = 0;
@@ -139,7 +139,7 @@
                 tc.$element.after(tc.$canvas);
             }
 
-            tc.context = this.canvas.get(0).getContext("2d");
+            tc.context = this.canvas.getContext("2d");
         },
 
         /**
@@ -293,6 +293,34 @@
             });
         },
 
+        pixelate: function(blockSize) {
+            var tc = this;
+            blockSize = blockSize || 100;
+            blockSize = 1/blockSize;
+
+            var w = tc.w * blockSize,
+                h = tc.h * blockSize;
+
+            tc.context.mozImageSmoothingEnabled = false;
+            tc.context.webkitImageSmoothingEnabled = false;
+            tc.context.imageSmoothingEnabled = false;
+
+            tc.context.drawImage(tc.canvas, 0, 0, w, h);
+
+            // TODO cannot draw from canvas?
+            tc.context.drawImage(tc.canvas, 0, 0, w, h, 0, 0, this.w, this.h);
+
+            tc.imgdIn   = tc.context.getImageData(0, 0, tc.w, tc.h); // get data from 2D context
+            tc.pixelsIn = tc.imgdIn.data;
+            tc.nrPixels = tc.pixelsIn.length;
+            
+            // make sure other effect get the updated data
+            tc.imgdOut   = tc.context.getImageData(0, 0, tc.w, tc.h);
+            tc.pixelsOut = tc.imgdOut.data;
+
+            tc.putImageData();
+        },
+
         /**
         * --------------------------------------------------------------------------------
         *           CONVULUTION FILTERS
@@ -308,12 +336,11 @@
         },
 
         boxBlur: function(options) {
-            var options = $.extend({}, {
+            options = $.extend({}, {
                 radius: 3
             }, options);
 
-            radius = options.radius;
-            var tc = this;
+            var radius = options.radius;
             var len = radius * radius;
             var val = 1 / len;
             var filter = [];
@@ -338,7 +365,7 @@
         },
 
         emboss: function(options) {
-            var options = $.extend({}, {
+            options = $.extend({}, {
                 offset: 127
             }, options);
 
@@ -428,11 +455,11 @@
         },
 
         hue: function(options) {
-            this.hslUpdate('h', options);
+            this.hslUpdate("h", options);
         },
 
         saturation: function(options) {
-            this.hslUpdate('s', options);
+            this.hslUpdate("s", options);
         },
 
         brightness: function(options) {
@@ -440,7 +467,7 @@
         },
 
         lightness: function(options) {
-            this.hslUpdate('l', options);
+            this.hslUpdate("l", options);
         },
 
         hslUpdate: function(axis, options) {
@@ -454,7 +481,7 @@
                 return false;
             }
 
-            var max = axis == "h" ? 360 : 100;
+            var max = axis === "h" ? 360 : 100;
 
             return this.process(function(r, g, b, a) {
                 var hsl = tc.rgb2hsl(r, g, b);
@@ -464,7 +491,7 @@
                     hsl[axis] = Math.min(Math.max(options.value/max, 0), 1);
                 } else {
                     // add the value to the current value
-                    if(axis == "h") {
+                    if(axis === "h") {
                         hsl[axis] = (hsl[axis]*360 + options.value) % max;
                         if(hsl[axis] < 0) {
                             hsl[axis] = max - hsl[axis];
@@ -590,7 +617,7 @@
             if (filter === undefined) {
                 $.error("filter not set");
             }
-            var options = $.extend({}, {
+            options = $.extend({}, {
                 updateR: true,
                 updateG: true,
                 updateB: true,
@@ -604,8 +631,6 @@
 
             var rm = Math.floor(rows/2); // center of row (current pixel)
             var cm = Math.floor(cols/2); // center of column (current pixel)
-
-            var rowShift = tc.w*4;
 
             return tc.process(function(r, g, b, a, x, y, i) {
                 

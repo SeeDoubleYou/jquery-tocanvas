@@ -38,11 +38,9 @@
 					opacity: 1,
 					hoverOpacity: 0,
 					process: [
-						// { grayscale: true },
-						{ hue: {
-							value: 350,
-							colorize: false,
-						} },
+						{ grayscale: true },
+						{ pixelate: 4.5 },
+						// { boxBlur: { radius: 10 } },
 					]
 				});
 

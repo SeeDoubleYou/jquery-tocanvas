@@ -53,8 +53,8 @@
     function Plugin ( element, options ) {
         this.element = element;
         this.$element = $(this.element);
-        this.canvas = $("<canvas>");
-        this.$canvas = $(this.canvas);
+        this.$canvas = $("<canvas>");
+        this.canvas = this.$canvas.get(0);
         this.wrapper = $("<div>");
         this.$wrapper = $(this.wrapper);
         this.renderCount = 0;
@@ -147,7 +147,7 @@
                 tc.$element.after(tc.$canvas);
             }
 
-            tc.context = this.canvas.get(0).getContext("2d");
+            tc.context = this.canvas.getContext("2d");
         },
 
         /**
@@ -301,27 +301,54 @@
             });
         },
 
+        pixelate: function(blockSize) {
+            var tc = this;
+            blockSize = blockSize || 100;
+            blockSize = 1/blockSize;
+
+            var w = tc.w * blockSize,
+                h = tc.h * blockSize;
+
+            tc.context.mozImageSmoothingEnabled = false;
+            tc.context.webkitImageSmoothingEnabled = false;
+            tc.context.imageSmoothingEnabled = false;
+
+            tc.context.drawImage(tc.canvas, 0, 0, w, h);
+
+            // TODO cannot draw from canvas?
+            tc.context.drawImage(tc.canvas, 0, 0, w, h, 0, 0, this.w, this.h);
+
+            tc.imgdIn   = tc.context.getImageData(0, 0, tc.w, tc.h); // get data from 2D context
+            tc.pixelsIn = tc.imgdIn.data;
+            tc.nrPixels = tc.pixelsIn.length;
+            
+            // make sure other effect get the updated data
+            tc.imgdOut   = tc.context.getImageData(0, 0, tc.w, tc.h);
+            tc.pixelsOut = tc.imgdOut.data;
+
+            tc.putImageData();
+        },
+
         /**
         * --------------------------------------------------------------------------------
         *           CONVULUTION FILTERS
         * -------------------------------------------------------------------------------- 
         */
         
-        blur: function() {
-            var tc = this;
-            return tc.process(function(r, g, b, a, x, y, i) {
-                var rgb = tc.convolutionFilter([
-                    [0.1, 0.1, 0.1],
-                    [0.1, 0.2, 0.1],
-                    [0.1, 0.1, 0.1]
-                ], i);
-                return [rgb[0], rgb[1], rgb[2], a];
-            });
+        blur: function(options) {
+            return this.convolutionFilter([
+                [0.1, 0.1, 0.1],
+                [0.1, 0.2, 0.1],
+                [0.1, 0.1, 0.1]
+            ], options);
         },
 
-        boxBlur: function(radius) {
-            radius = radius || 3;
-            var tc = this;
+        boxBlur: function(options) {
+            options = $.extend({}, {
+                radius: 3
+            }, options);
+
+            var radius = options.radius;
             var len = radius * radius;
             var val = 1 / len;
             var filter = [];
@@ -334,86 +361,57 @@
                 filter.push(row);   
             }
 
-            return tc.process(function(r, g, b, a, x, y, i) {
-                var rgb = tc.convolutionFilter(filter, i);
-                return [rgb[0], rgb[1], rgb[2], a];
-            });
+            return this.convolutionFilter(filter, options);
         },
 
-        sharpen: function() {
-            var tc = this;
-            return tc.process(function(r, g, b, a, x, y, i) {
-                var rgb = tc.convolutionFilter([
-                    [ 0, -1,  0],
-                    [-1,  5, -1],
-                    [ 0, -1,  0]
-                ], i);
-                return [rgb[0], rgb[1], rgb[2], a];
-            });
+        sharpen: function(options) {
+            return this.convolutionFilter([
+                [ 0, -1,  0],
+                [-1,  5, -1],
+                [ 0, -1,  0]
+            ], options);
         },
 
-        emboss: function() {
-            var tc = this;
-            return tc.process(function(r, g, b, a, x, y, i) {
-                var rgb = tc.convolutionFilter([
-                    [2,  0,  0],
-                    [0, -1,  0],
-                    [0,  0, -1]
-                ], i, {
-                    offset: 127
-                });
-                return [rgb[0], rgb[1], rgb[2], a];
-            });  
+        emboss: function(options) {
+            options = $.extend({}, {
+                offset: 127
+            }, options);
+
+            return this.convolutionFilter([
+                [2,  0,  0],
+                [0, -1,  0],
+                [0,  0, -1]
+            ], options);
         },
 
-        laplace: function() {
-            var tc = this;
-            return tc.process(function(r, g, b, a, x, y, i) {
-                var rgb = tc.convolutionFilter([
-                    [0,  1, 0],
-                    [1, -4, 1],
-                    [0,  1, 0]
-                ], i);
-                return [rgb[0], rgb[1], rgb[2], a];
-            });
+        laplace: function(options) {
+            return this.convolutionFilter([
+                [0,  1, 0],
+                [1, -4, 1],
+                [0,  1, 0]
+            ], options);
         },
 
-        sobel: function() {
-            this.sobelVertical();
+        sobel: function(options) {
+            this.sobelVertical(options);
             this.putImageData();
-            return this.sobelHorizontal();
+            return this.sobelHorizontal(options);
         },
 
-        sobelVertical: function() {
-            var tc = this;
-            return tc.process(function(r, g, b, a, x, y, i) {
-                var rgb = tc.convolutionFilter([
-                    [-1, 0, 1],
-                    [-2, 0, 2],
-                    [-1, 0, 1]
-                ], i);
-                r = rgb[0];
-                g = rgb[1];
-                b = rgb[2];
-
-                return [rgb[0], rgb[1], rgb[2], a];
-            });
+        sobelVertical: function(options) {
+            return this.convolutionFilter([
+                [-1, 0, 1],
+                [-2, 0, 2],
+                [-1, 0, 1]
+            ], options);
         },
 
-        sobelHorizontal: function() {
-            var tc = this;
-            return tc.process(function(r, g, b, a, x, y, i) {
-                var rgb = tc.convolutionFilter([
-                    [-1, -2, -1],
-                    [ 0,  0,  0],
-                    [ 1,  2,  1]
-                ], i);
-                r = rgb[0];
-                g = rgb[1];
-                b = rgb[2];
-  
-                return [rgb[0], rgb[1], rgb[2], a];
-            });
+        sobelHorizontal: function(options) {
+            return this.convolutionFilter([
+                [-1, -2, -1],
+                [ 0,  0,  0],
+                [ 1,  2,  1]
+            ], options);
         },
 
         /**
@@ -464,32 +462,56 @@
             });
         },
 
-        brightness: function(brightness) {
-            if (brightness === undefined) {
-                $.error("brightness adjustment not set");
-            }
-
-            return this.process(function(r, g, b, a) {
-                return [
-                    r + brightness,
-                    g + brightness,
-                    b + brightness,
-                    a
-                ];
-            });
+        hue: function(options) {
+            this.hslUpdate("h", options);
         },
 
-        saturation: function(saturation) {
-            if (saturation === undefined) {
-                $.error("saturation adjustment not set");
+        saturation: function(options) {
+            this.hslUpdate("s", options);
+        },
+
+        brightness: function(options) {
+            this.lightness(options);
+        },
+
+        lightness: function(options) {
+            this.hslUpdate("l", options);
+        },
+
+        hslUpdate: function(axis, options) {
+            var tc = this;
+            options = $.extend( {}, {
+                value: 0,
+                colorize: false
+            }, options );
+
+            if (options.value === 0 && options.colorize !== true) {
+                return false;
             }
 
-            var tc = this;
+            var max = axis === "h" ? 360 : 100;
+
             return this.process(function(r, g, b, a) {
                 var hsl = tc.rgb2hsl(r, g, b);
 
-                hsl.s = Math.min(Math.max(saturation/100, 0), 1);
+                if(options.colorize) {
+                    // colorize means, set the value to exaclty the value
+                    hsl[axis] = Math.min(Math.max(options.value/max, 0), 1);
+                } else {
+                    // add the value to the current value
+                    if(axis === "h") {
+                        hsl[axis] = (hsl[axis]*360 + options.value) % max;
+                        if(hsl[axis] < 0) {
+                            hsl[axis] = max - hsl[axis];
+                        }
+                        hsl[axis] /= max;
+                    } else {
+                        hsl[axis] = Math.min(Math.max(hsl[axis] + options.value/max, 0), 1);
+                    }
+                }
+
                 var rgb = tc.hsl2rgb(hsl.h, hsl.s, hsl.l);
+                
                 return [
                     rgb.r,
                     rgb.g,
@@ -599,20 +621,18 @@
             return p;
         },
 
-        convolutionFilter: function(filter, i, options) {
+        convolutionFilter: function(filter, options) {
             if (filter === undefined) {
                 $.error("filter not set");
             }
             options = $.extend({}, {
-                channels: "rgb",
-                offset: 0
+                updateR: true,
+                updateG: true,
+                updateB: true,
+                offset: 0,
             }, options);
 
             var tc = this;
-
-            var updateR = (/r/i.test(options.channels));
-            var updateG = (/g/i.test(options.channels));
-            var updateB = (/b/i.test(options.channels));
 
             var rows = filter.length;    // odd
             var cols = filter[0].length; // odd
@@ -620,25 +640,33 @@
             var rm = Math.floor(rows/2); // center of row (current pixel)
             var cm = Math.floor(cols/2); // center of column (current pixel)
 
-            var nR = updateR ? 0 : tc.pixelsIn[i  ],
-                nG = updateG ? 0 : tc.pixelsIn[i+1],
-                nB = updateB ? 0 : tc.pixelsIn[i+2]
-            ;
-            var rowShift = tc.w*4;
-
-            for(var r = 0; r < rows; r++) {
-                var ri = rowShift * (r < rm ? -1 : (r > rm ? +1 : 0));
+            return tc.process(function(r, g, b, a, x, y, i) {
                 
-                for(var c = 0; c < cols; c++) {
-                    var cd = Math.abs(c-cm);
-                    var ci = 4 * (c < cm ? -cd : (c > cm ? +cd : 0));
+                var nR = options.updateR ? 0 : tc.pixelsIn[i  ],
+                    nG = options.updateG ? 0 : tc.pixelsIn[i+1],
+                    nB = options.updateB ? 0 : tc.pixelsIn[i+2]
+                ;
 
-                    if(updateR) { nR += (filter[r][c] * tc.pixelsIn[i   + ri + ci]); }
-                    if(updateG) { nG += (filter[r][c] * tc.pixelsIn[i+1 + ri + ci]); }
-                    if(updateB) { nB += (filter[r][c] * tc.pixelsIn[i+2 + ri + ci]); }
-                }     
-            }
-            return [options.offset + nR, options.offset + nG, options.offset + nB];
+                for(var row = 0; row < rows; row++) {
+                    var rd = Math.abs(row-rm);
+                    var ri = (row < rm ? -rd : (row > rm ? +rd : 0));
+
+                    var nY = Math.max(Math.min(y+ri, tc.h-1), 0);
+                    
+                    for(var col = 0; col < cols; col++) {
+                        var cd = Math.abs(col-cm);
+                        var ci = (col < cm ? -cd : (col > cm ? +cd : 0));
+
+                        var nX = Math.max(Math.min(x+ci, tc.w-1), 0);
+                        var nI = 4*(nY * tc.w + nX);
+
+                        if(options.updateR) { nR += (filter[row][col] * tc.pixelsIn[nI  ]); }
+                        if(options.updateG) { nG += (filter[row][col] * tc.pixelsIn[nI+1]); }
+                        if(options.updateB) { nB += (filter[row][col] * tc.pixelsIn[nI+2]); }
+                    }     
+                }
+                return [options.offset + nR, options.offset + nG, options.offset + nB, a];
+            });
         },
 
     });

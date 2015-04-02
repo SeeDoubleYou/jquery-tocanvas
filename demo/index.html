@@ -38,8 +38,14 @@
 					opacity: 1,
 					hoverOpacity: 0,
 					process: [
-						{ grayscale: true },
-						{ pixelate: 4.5 },
+						{ hue: { value: 5 } },
+						{ saturation: { value: -20, colorize: false } },
+						{ vignette: { 
+							opacity: 0.5,
+							size: 0.2  
+						} },
+						{ contrast: 10 }
+						// { pixelate: 4.5 },
 						// { boxBlur: { radius: 10 } },
 					]
 				});

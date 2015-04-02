@@ -492,7 +492,7 @@
                 } else {
                     // add the value to the current value
                     if(axis === "h") {
-                        hsl[axis] = (hsl[axis]*360 + options.value) % max;
+                        hsl[axis] = (hsl[axis]*max + options.value) % max;
                         if(hsl[axis] < 0) {
                             hsl[axis] = max - hsl[axis];
                         }

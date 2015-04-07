@@ -37,6 +37,7 @@
             opacity: 1,
             overlay: true,
             process: {},
+            sharedOptions: {},
             zIndex: 10
         }
     ;
@@ -199,13 +200,14 @@
          * @return {obj}      this
          */
         process: function(callback, options) {
+            console.log(this.settings.sharedOptions);
             options = $.extend({}, {
                 opacity: 1,
                 xPctStart: 0,
                 xPctEnd: 100,
                 yPctStart: 0,
                 yPctEnd: 100,
-            }, options);
+            }, this.settings.sharedOptions, options);
 
             var xStart = Math.round(options.xPctStart * (this.w/100));
             var xEnd   = Math.round(options.xPctEnd   * (this.w/100));

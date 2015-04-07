@@ -57,17 +57,20 @@
 						// 	opacity: 0.5,
 						// 	size: 0.2  
 						// } },
-						// { contrast: 10 }
+						{ contrast: 10 },
 						// { pixelate: 4.5 },
 						// { boxBlur: { radius: 10 } },
 						{ gaussianBlur: { 
 							radius: 10,
-							xPctStart: 20,
+							xPctStart: 10,
 			                xPctEnd: 80,
 			                yPctStart: 50,
 			                yPctEnd: 90
 						} },
-					]
+					],
+					sharedOptions: {
+						xPctStart: 20,
+					}
 				});
 
 				$(".toCanvas").toCanvas({

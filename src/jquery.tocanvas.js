@@ -201,10 +201,19 @@
         process: function(callback, options) {
             options = $.extend({}, {
                 opacity: 1,
+                xPctStart: 0,
+                xPctEnd: 100,
+                yPctStart: 0,
+                yPctEnd: 100,
             }, options);
 
-            for (var x = 0; x < this.w; x++) {
-                for (var y = 0; y < this.h; y++) {
+            var xStart = Math.round(options.xPctStart * (this.w/100));
+            var xEnd   = Math.round(options.xPctEnd   * (this.w/100));
+            var yStart = Math.round(options.yPctStart * (this.h/100));
+            var yEnd   = Math.round(options.yPctEnd   * (this.h/100));
+
+            for (var x = xStart; x < xEnd; x++) {
+                for (var y = yStart; y < yEnd; y++) {
                     var i = 4*(y*this.w + x);
                     var r = this.pixelsIn[i],
                         g = this.pixelsIn[i+1],
@@ -369,7 +378,7 @@
 
         gaussianBlur: function(options) {
             options = $.extend({}, {
-                radius: 3,
+                radius: 3
             }, options);
 
             var radius = options.radius;
@@ -394,7 +403,11 @@
                 }
             }
 
-            return this.convolutionFilter(filter, options);
+            options = $.extend({}, {
+                filter: filter
+            }, options);
+
+            return this.convolutionFilter(options);
         },
 
         sharpen: function(options) {

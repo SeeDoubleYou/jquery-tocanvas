@@ -60,7 +60,13 @@
 						// { contrast: 10 }
 						// { pixelate: 4.5 },
 						// { boxBlur: { radius: 10 } },
-						{ sharpen: { opacity: 0.5 } },
+						{ gaussianBlur: { 
+							radius: 10,
+							xPctStart: 20,
+			                xPctEnd: 80,
+			                yPctStart: 50,
+			                yPctEnd: 90
+						} },
 					]
 				});
 
@@ -69,10 +75,10 @@
 					hoverOpacity: 0,
 					process: [
 						{ gamma: { value: 1.4 } },
-						{ invert: {} },
+						{ invert: { opacity: 0.2 } },
 						{ brightness: { value: -10 } },
 						{ vignette: { 
-							opacity: 1,
+							opacity: 0.4,
 							size: 0.2  
 						} }
 					]
@@ -86,7 +92,7 @@
 				$('.toCanvas-video').toCanvas({
 					framerate: 10,
 					process: [
-						{ invert: true },
+						{ invert: {} },
 						{ vignette: { 
 							opacity: 1,
 							size: 0.2  

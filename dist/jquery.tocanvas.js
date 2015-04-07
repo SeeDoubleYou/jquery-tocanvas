@@ -208,7 +208,6 @@
          * @return {obj}      this
          */
         process: function(callback, options) {
-            console.log(this.settings.sharedOptions);
             options = $.extend({}, {
                 opacity: 1,
                 xPctStart: 0,

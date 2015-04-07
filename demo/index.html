@@ -4,93 +4,235 @@
 		<title>jQuery toCanvas Plugin</title>
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 		<script src="../src/jquery.toCanvas.js"></script>
-		<style>
-			canvas {
-				transition: all 0.8s;
-			}
-		</style>
+		<link href="//fonts.googleapis.com/css?family=Raleway:400,700" rel="stylesheet" type="text/css" />
+		<link href="prism.css" rel="stylesheet" type="text/css" />
+		<link href="styles.css" rel="stylesheet" type="text/css" />
 	</head>
 	<body>
-		<img src="ny_view.jpg" />
-		<img src="ny_view.jpg" class="toCanvas-tmp" />
-		<img src="ny_view.jpg" class="toCanvas" />
-		<img src="ny_view.jpg" class="toCanvas-lomo" />
+		<div id="loader"><p>Wait for it...</p></div>
 
-		<!--
-		<video class="toCanvas-video" width="640" height="360" controls autoplay loop>
-			<source src="big_buck_bunny.mp4" type="video/mp4">
-			<source src="big_buck_bunny.webm" type="video/webm">
-			<source src="big_buck_bunny.ogv" type="video/ogg">
-		</video>
-		-->
+		<div class="wrapper">
+			<div class="intro">
+				<h1>jQuery toCanvas</h1>
 
+				<p>
+					This plugin allows you to add live effects to images and videos.
+				</p>
+				<p>
+					Setting it up is easy! Simply <a href="https://github.com/SeeDoubleYou/jquery-tocanvas">download the project from the github page</a>, include it on the page and use it like the examples below.
+				</p>
+
+				<iframe id="forkframe" src="https://ghbtns.com/github-btn.html?user=seedoubleyou&repo=jquery-tocanvas&type=fork&count=true" frameborder="0" scrolling="0" width="170px" height="20px"></iframe>
+			</div>
+
+			<div class="example">
+				<h2>Original</h2>
+				<p>
+					A picture I took from my hotel in New-York in the summer of 2011
+				</p>
+				<img src="ny_view.jpg" />
+			</div>
+
+			<!-- --------------------------------------------------------------- -->
+
+			<div class="example">
+				<h2>Grayscale</h2>
+				<p>
+					Simple grayscale, single effect. Hover over the image to see the original.
+				</p>
+				<pre><code class="language-javascript">$(".toCanvas-gray").toCanvas({
+    hoverOpacity: 0,
+    process: [
+        { grayscale: { } }
+    ]
+});</code></pre>
+				<img src="ny_view.jpg" class="toCanvas-gray" />
+			</div>
+
+			<!-- --------------------------------------------------------------- -->
+
+			<div class="example">
+				<h2>Hue, Saturation and Lightness</h2>
+				<p>
+					You can change the HSL.
+				</p>
+				<pre><code class="language-javascript">
+$(".toCanvas-hsl").toCanvas({
+	hoverOpacity: 0,
+	process: [
+		{ hue: { value: 50, colorize: true } },
+		{ saturation: { value: -50 } },
+		{ lightness:  { value: +10 } }
+	]
+});</code></pre>
+				<img src="ny_view.jpg" class="toCanvas-hsl" />
+			</div>
+
+			<!-- --------------------------------------------------------------- -->
+
+			<div class="example">
+				<h2>Gaussian Blur</h2>
+				<p>
+					You can use convolution filters as well. Some come with toCanvas built in, like a gaussian filter.
+				</p>
+				<pre><code class="language-javascript">
+$(".toCanvas-gauss").toCanvas({
+	hoverOpacity: 0,
+	process: [
+		{ gaussianBlur: { radius: 10} }
+	]
+});</code></pre>
+				<img src="ny_view.jpg" class="toCanvas-gauss" />
+			</div>
+
+			<!-- --------------------------------------------------------------- -->
+			
+			<div class="example">
+				<h2>Gaussian Blur</h2>
+				<p>
+					Custom convolution filters are supported. The example below shows an example of a motion blur filter
+				</p>
+				<pre><code class="language-javascript">
+$(".toCanvas-move").toCanvas({
+	hoverOpacity: 0,
+	process: [
+		{ convolutionFilter: { filter: [
+		  [1/9, 0, 0, 0, 0, 0, 0, 0, 0],
+	      [0, 1/9, 0, 0, 0, 0, 0, 0, 0],
+	      [0, 0, 1/9, 0, 0, 0, 0, 0, 0],
+	      [0, 0, 0, 1/9, 0, 0, 0, 0, 0],
+	      [0, 0, 0, 0, 1/9, 0, 0, 0, 0],
+	      [0, 0, 0, 0, 0, 1/9, 0, 0, 0],
+	      [0, 0, 0, 0, 0, 0, 1/9, 0, 0],
+	      [0, 0, 0, 0, 0, 0, 0, 1/9, 0],
+	      [0, 0, 0, 0, 0, 0, 0, 0, 1/9]
+		] } }
+	]
+});</code></pre>
+				<img src="ny_view.jpg" class="toCanvas-move" />
+			</div>
+
+
+			<!-- --------------------------------------------------------------- -->
+
+			<div class="example">
+				<img src="ny_view.jpg" class="toCanvas-lomo" />
+			</div>
+
+			<!-- --------------------------------------------------------------- -->
+
+			<video class="toCanvas-video" width="640" height="360" volume="0" controls autoplay loop>
+				<source src="big_buck_bunny.mp4" type="video/mp4" />
+				<source src="big_buck_bunny.webm" type="video/webm" />
+				<source src="big_buck_bunny.ogv" type="video/ogg" />
+			</video>
+		</div>
+
+		<script src="prism.js"></script>
 		<script>
 			$(function() {
-				var lomoLight = [
-					{ brightness: { value: -5 } },
-					{ saturation: { value: 20 } },
-					{ gamma: { value: 1.4 } },
-					{ vignette: { opacity: 0.8 } },
-					{ brightness: { value: 5 } }
-				];
+				$('#loader').show();
 
-				$(".toCanvas-tmp").toCanvas({
-					opacity: 1,
+				$(".toCanvas-gray").toCanvas({
 					hoverOpacity: 0,
 					process: [
-						// { convolutionFilter: [
-						// 	[1/9, 0, 0, 0, 0, 0, 0, 0, 0],
-						//     [0, 1/9, 0, 0, 0, 0, 0, 0, 0],
-						//     [0, 0, 1/9, 0, 0, 0, 0, 0, 0],
-						//     [0, 0, 0, 1/9, 0, 0, 0, 0, 0],
-						//     [0, 0, 0, 0, 1/9, 0, 0, 0, 0],
-						//     [0, 0, 0, 0, 0, 1/9, 0, 0, 0],
-						//     [0, 0, 0, 0, 0, 0, 1/9, 0, 0],
-						//     [0, 0, 0, 0, 0, 0, 0, 1/9, 0],
-						//     [0, 0, 0, 0, 0, 0, 0, 0, 1/9]
-						// ] }
-						// { grayscale: {} },
-						// { sobel: {} }
-						// { hue: { value: 5 } },
-						// { saturation: { value: -20, colorize: false } },
-						// { vignette: { 
-						// 	opacity: 0.5,
-						// 	size: 0.2  
-						// } },
-						{ contrast: 10 },
-						// { pixelate: 4.5 },
-						// { boxBlur: { radius: 10 } },
-						{ gaussianBlur: { 
-							radius: 10,
-							xPctStart: 10,
-			                xPctEnd: 80,
-			                yPctStart: 50,
-			                yPctEnd: 90
-						} },
-					],
-					sharedOptions: {
-						xPctStart: 20,
-					}
+						{ grayscale: { } }
+					]
 				});
 
-				$(".toCanvas").toCanvas({
-					opacity: 1,
+				$(".toCanvas-hsl").toCanvas({
 					hoverOpacity: 0,
 					process: [
-						{ gamma: { value: 1.4 } },
-						{ invert: { opacity: 0.2 } },
-						{ brightness: { value: -10 } },
-						{ vignette: { 
-							opacity: 0.4,
-							size: 0.2  
+						{ hue: { value: 50, colorize: true } },
+						{ saturation: { value: -50 } },
+						{ lightness:  { value: +10 } }
+					]
+				});
+
+				$(".toCanvas-gauss").toCanvas({
+					hoverOpacity: 0,
+					process: [
+						{ gaussianBlur: { radius: 10} }
+					]
+				});
+
+				$(".toCanvas-move").toCanvas({
+					hoverOpacity: 0,
+					process: [
+						{ convolutionFilter: { 
+							filter: [
+								[1/9, 0, 0, 0, 0, 0, 0, 0, 0],
+							    [0, 1/9, 0, 0, 0, 0, 0, 0, 0],
+							    [0, 0, 1/9, 0, 0, 0, 0, 0, 0],
+							    [0, 0, 0, 1/9, 0, 0, 0, 0, 0],
+							    [0, 0, 0, 0, 1/9, 0, 0, 0, 0],
+							    [0, 0, 0, 0, 0, 1/9, 0, 0, 0],
+							    [0, 0, 0, 0, 0, 0, 1/9, 0, 0],
+							    [0, 0, 0, 0, 0, 0, 0, 1/9, 0],
+							    [0, 0, 0, 0, 0, 0, 0, 0, 1/9]
+							]
 						} }
 					]
 				});
 
-				$(".toCanvas-lomo").toCanvas({
-					overlay: false,
-					process: lomoLight
-				});
+				
+				// $(".toCanvas-tmp").toCanvas({
+				// 	opacity: 1,
+				// 	hoverOpacity: 0,
+				// 	process: [
+				// 		// { convolutionFilter: [
+				// 		// 	
+				// 		// ] }
+				// 		{ grayscale: {
+				// 			xPctStart: 40,
+				// 		} },
+
+				// 		{ grayscale: {
+				// 			xPctStart: 5,
+			 //                xPctEnd: 95,
+			 //                yPctStart: 5,
+			 //                yPctEnd: 15
+				// 		} },
+
+				// 		{ grayscale: {
+				// 			xPctStart: 5,
+			 //                xPctEnd: 95,
+			 //                yPctStart: 20,
+			 //                yPctEnd: 35
+				// 		} },
+
+				// 		// { sobel: {} }
+				// 		// { hue: { value: 5 } },
+				// 		// { saturation: { value: -20, colorize: false } },
+				// 		// { vignette: { 
+				// 		// 	opacity: 0.5,
+				// 		// 	size: 0.2  
+				// 		// } },
+				// 		{ contrast: 10 },
+				// 		// { pixelate: 4.5 },
+				// 		// { boxBlur: { radius: 10 } },
+				// 		{ gaussianBlur: { 
+				// 			radius: 10,
+				// 			xPctStart: 20,
+				// 		} },
+				// 	],
+				// 	sharedOptions: {
+				// 		xPctStart: 10,
+		  //               xPctEnd: 80,
+		  //               yPctStart: 50,
+		  //               yPctEnd: 90
+				// 	}
+				// });
+
+				// $(".toCanvas-lomo").toCanvas({
+				// 	process: [
+				// 		{ brightness: { value: -5 } },
+				// 		{ saturation: { value: 20 } },
+				// 		{ gamma: { value: 1.4 } },
+				// 		{ vignette: { opacity: 0.8 } },
+				// 		{ brightness: { value: 5 } }
+				// 	]
+				// });
 
 				$('.toCanvas-video').toCanvas({
 					framerate: 10,
@@ -102,6 +244,8 @@
 						} }
 					]
 				});
+
+				$('#loader').delay(500).fadeOut();
 			});
 		</script>
 	</body>

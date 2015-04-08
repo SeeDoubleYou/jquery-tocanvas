@@ -112,20 +112,28 @@ $(".toCanvas-move").toCanvas({
 				<img src="ny_view.jpg" class="toCanvas-move" />
 			</div>
 
-
 			<!-- --------------------------------------------------------------- -->
 
 			<div class="example">
-				<img src="ny_view.jpg" class="toCanvas-lomo" />
+				<h2>Video!</h2>
+				<p>
+					toCanvas works with html5 video. In the example below the canvas it not overlayed and shows an inverted version of the video below the actual video.
+				</p>
+				<pre><code class="language-javascript">
+$('.toCanvas-video').toCanvas({
+	framerate: 10,
+	overlay: false,
+	process: [
+		{ invert: {} },
+	]
+});</code></pre>
+
+				<video class="toCanvas-video" width="400" height="225" volume="0" controls autoplay loop>
+					<source src="big_buck_bunny.mp4" type="video/mp4" />
+					<source src="big_buck_bunny.webm" type="video/webm" />
+					<source src="big_buck_bunny.ogv" type="video/ogg" />
+				</video>
 			</div>
-
-			<!-- --------------------------------------------------------------- -->
-
-			<video class="toCanvas-video" width="640" height="360" volume="0" controls autoplay loop>
-				<source src="big_buck_bunny.mp4" type="video/mp4" />
-				<source src="big_buck_bunny.webm" type="video/webm" />
-				<source src="big_buck_bunny.ogv" type="video/ogg" />
-			</video>
 		</div>
 
 		<script src="prism.js"></script>
@@ -175,6 +183,13 @@ $(".toCanvas-move").toCanvas({
 					]
 				});
 
+				$('.toCanvas-video').toCanvas({
+					framerate: 10,
+					overlay: false,
+					process: [
+						{ invert: {} },
+					]
+				});
 				
 				// $(".toCanvas-tmp").toCanvas({
 				// 	opacity: 1,
@@ -234,16 +249,6 @@ $(".toCanvas-move").toCanvas({
 				// 	]
 				// });
 
-				$('.toCanvas-video').toCanvas({
-					framerate: 10,
-					process: [
-						{ invert: {} },
-						{ vignette: { 
-							opacity: 1,
-							size: 0.2  
-						} }
-					]
-				});
 
 				$('#loader').delay(500).fadeOut();
 			});

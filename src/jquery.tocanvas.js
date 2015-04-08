@@ -32,6 +32,7 @@
     // Create the defaults once
     var pluginName = "toCanvas",
         defaults = {
+            continuous: false,
             framerate: 0,
             hoverOpacity: 1,
             opacity: 1,
@@ -154,7 +155,9 @@
                 return false;
             }
 
-            tc.context.drawImage(tc.imageObj, 0, 0, tc.w, tc.h); // draw image to canvas
+            if(!tc.settings.continuous || tc.renderCount === 0) {
+                tc.context.drawImage(tc.imageObj, 0, 0, tc.w, tc.h); // draw image to canvas
+            }
             tc.imgdIn   = tc.context.getImageData(0, 0, tc.w, tc.h); // get data from 2D context  
             tc.pixelsIn = tc.imgdIn.data;
             tc.nrPixels = tc.pixelsIn.length;  

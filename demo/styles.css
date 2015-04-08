@@ -35,6 +35,11 @@ canvas {
 	transition: all 0.8s;
 }
 
+video {
+	display: block;
+	margin: 0 auto;
+}
+
 #loader {
 	background-color: #000;
 	bottom: 0;

@@ -2,13 +2,14 @@
 <html>
 	<head>
 		<title>jQuery toCanvas Plugin</title>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-		<script src="../src/jquery.toCanvas.js"></script>
+		<script src="../src/jquery.tocanvas.js"></script>
 		<link href="//fonts.googleapis.com/css?family=Raleway:400,700" rel="stylesheet" type="text/css" />
 		<link href="prism.css" rel="stylesheet" type="text/css" />
 		<link href="styles.css" rel="stylesheet" type="text/css" />
 	</head>
-	<body>
+	<body id="top">
 		<div id="loader"><p>Wait for it...</p></div>
 
 		<div class="wrapper">
@@ -16,8 +17,46 @@
 				<h1>jQuery toCanvas</h1>
 
 				<p>
-					This plugin allows you to add live effects to images and videos.
+					This plugin allows you to add live effects to images and <a href="#example-video">videos</a>! It features effects and overlays such as:
 				</p>
+				<ul>
+					<li><a href="#example-grayscale">Grayscale</a></li>
+					<li>Sepia</li>
+					<li>Invert</li>
+					<li>Edges</li>
+					<li><a href="#example-hsl">Hue, Saturation and Lightness</a></li>
+					<li><a href="#example-hsl">HSL Colorization</a></li>
+					<li>Noise (random)</li>
+					<li>Pixelate</li>
+					<li>Blur</li>
+					<li>Box blur</li>
+					<li><a href="#example-gaussianblur">Gaussian blur</a></li>
+					<li><a href="#example-customconvolution">Custom covolution filters</a></li>
+					<li>Sharpen</li>
+					<li>Emboss</li>
+					<li>Laplace</li>
+					<li>Sobel</li>
+					<li>Threshold</li>
+					<li>Contrast</li>
+					<li>Gamma</li>
+					<li>Vignette</li>
+					<li><a href="#example-cobined">Any combination of effects</a></li>
+				</ul>
+				<p>Each effect may have it's own specific settings which at some point will all be documented. There are some general options as well.</p>
+				<pre><code class="language-javascript">$(".toCanvas").toCanvas({
+framerate: 0, // updates per seconds (use this for video)
+hoverOpacity: 1, // opacity of canvas on hover
+opacity: 1, // opacity of canvas
+overlay: true, // draw canvas on top of image/video
+process: {}, // sets the effects to be used
+sharedOptions: { // object with options that are re-used for all processed effects
+  opacity:   1, // opacity of the effect
+  xPctStart: 0, // % on x-axis to start
+  xPctEnd: 100, // % on x-axis to end
+  yPctStart: 0, // % on y-axis to start
+  yPctEnd: 100, // % on y-axis to end
+}
+});</code></pre>
 				<p>
 					Setting it up is easy! Simply <a href="https://github.com/SeeDoubleYou/jquery-tocanvas">download the project from the github page</a>, include it on the page and use it like the examples below.
 				</p>
@@ -26,7 +65,7 @@
 			</div>
 
 			<div class="example">
-				<h2>Original</h2>
+				<h2>Original, no toCanvas</h2>
 				<p>
 					A picture I took from my hotel in New-York in the summer of 2011
 				</p>
@@ -35,7 +74,7 @@
 
 			<!-- --------------------------------------------------------------- -->
 
-			<div class="example">
+			<div class="example" id="example-grayscale">
 				<h2>Grayscale</h2>
 				<p>
 					Simple grayscale, single effect. Hover over the image to see the original.
@@ -51,7 +90,7 @@
 
 			<!-- --------------------------------------------------------------- -->
 
-			<div class="example">
+			<div class="example" id="example-hsl">
 				<h2>Hue, Saturation and Lightness</h2>
 				<p>
 					You can change the HSL.
@@ -70,7 +109,7 @@ $(".toCanvas-hsl").toCanvas({
 
 			<!-- --------------------------------------------------------------- -->
 
-			<div class="example">
+			<div class="example" id="example-gaussianblur">
 				<h2>Gaussian Blur</h2>
 				<p>
 					You can use convolution filters as well. Some come with toCanvas built in, like a gaussian filter.
@@ -87,34 +126,67 @@ $(".toCanvas-gauss").toCanvas({
 
 			<!-- --------------------------------------------------------------- -->
 			
-			<div class="example">
-				<h2>Gaussian Blur</h2>
+			<div class="example" id="example-customconvolution">
+				<h2>Custom convolution filter</h2>
 				<p>
 					Custom convolution filters are supported. The example below shows an example of a motion blur filter
 				</p>
 				<pre><code class="language-javascript">
 $(".toCanvas-move").toCanvas({
-	hoverOpacity: 0,
-	process: [
-		{ convolutionFilter: { filter: [
-		  [1/9, 0, 0, 0, 0, 0, 0, 0, 0],
-	      [0, 1/9, 0, 0, 0, 0, 0, 0, 0],
-	      [0, 0, 1/9, 0, 0, 0, 0, 0, 0],
-	      [0, 0, 0, 1/9, 0, 0, 0, 0, 0],
-	      [0, 0, 0, 0, 1/9, 0, 0, 0, 0],
-	      [0, 0, 0, 0, 0, 1/9, 0, 0, 0],
-	      [0, 0, 0, 0, 0, 0, 1/9, 0, 0],
-	      [0, 0, 0, 0, 0, 0, 0, 1/9, 0],
-	      [0, 0, 0, 0, 0, 0, 0, 0, 1/9]
-		] } }
-	]
+  hoverOpacity: 0,
+  process: [
+	{ convolutionFilter: { filter: [
+	  [1/9, 0, 0, 0, 0, 0, 0, 0, 0],
+	  [0, 1/9, 0, 0, 0, 0, 0, 0, 0],
+	  [0, 0, 1/9, 0, 0, 0, 0, 0, 0],
+	  [0, 0, 0, 1/9, 0, 0, 0, 0, 0],
+	  [0, 0, 0, 0, 1/9, 0, 0, 0, 0],
+	  [0, 0, 0, 0, 0, 1/9, 0, 0, 0],
+	  [0, 0, 0, 0, 0, 0, 1/9, 0, 0],
+	  [0, 0, 0, 0, 0, 0, 0, 1/9, 0],
+	  [0, 0, 0, 0, 0, 0, 0, 0, 1/9]
+	] } }
+  ]
 });</code></pre>
 				<img src="ny_view.jpg" class="toCanvas-move" />
 			</div>
 
 			<!-- --------------------------------------------------------------- -->
 
-			<div class="example">
+			<div class="example" id="example-combined">
+				<h2>Combined effects</h2>
+				<p>
+					You can use combine and even repeat effects. In the example below we make the bottom 30% gray, threshold a bar, add some gaussian blur and a sharpen. Pro tip: don't do this for videos.
+				</p>
+				<pre><code class="language-javascript">
+$(".toCanvas-combined").toCanvas({
+hoverOpacity: 0,
+process: [
+	{ grayscale: {
+		yPctStart: 70,
+	} },
+	{ threshold: {
+		yPctStart: 70,
+		yPctEnd: 80,
+		opacity: 0.9
+	} },
+	{ gaussianBlur: { 
+		radius: 10,
+		xPctStart: 15,
+		xPctEnd: 50,
+	} },
+	{ sharpen: {
+		xPctStart: 70,
+		xPctEnd: 90,
+	} },
+]
+});</code></pre>
+				<img src="ny_view.jpg" class="toCanvas-combined" />
+			</div>
+
+			<!-- --------------------------------------------------------------- -->
+
+			<div class="example" id="example-video">
 				<h2>Video!</h2>
 				<p>
 					toCanvas works with html5 video. In the example below the canvas it not overlayed and shows an inverted version of the video below the actual video.
@@ -128,7 +200,7 @@ $('.toCanvas-video').toCanvas({
 	]
 });</code></pre>
 
-				<video class="toCanvas-video" width="400" height="225" volume="0" controls autoplay loop>
+				<video class="toCanvas-video" width="400" height="225" controls autoplay loop muted>
 					<source src="big_buck_bunny.mp4" type="video/mp4" />
 					<source src="big_buck_bunny.webm" type="video/webm" />
 					<source src="big_buck_bunny.ogv" type="video/ogg" />
@@ -183,74 +255,51 @@ $('.toCanvas-video').toCanvas({
 					]
 				});
 
+				$(".toCanvas-combined").toCanvas({
+					hoverOpacity: 0,
+					process: [
+						{ grayscale: {
+							yPctStart: 70,
+						} },
+						{ threshold: {
+							yPctStart: 70,
+							yPctEnd: 80,
+							opacity: 0.9
+						} },
+						{ gaussianBlur: { 
+							radius: 10,
+							xPctStart: 15,
+							xPctEnd: 50,
+						} },
+						{ sharpen: {
+							xPctStart: 70,
+							xPctEnd: 90,
+						} },
+					]
+				});
+
 				$('.toCanvas-video').toCanvas({
 					framerate: 10,
 					overlay: false,
 					process: [
-						{ invert: {} },
-					]
+						{ invert: {} },					]
 				});
-				
-				// $(".toCanvas-tmp").toCanvas({
-				// 	opacity: 1,
-				// 	hoverOpacity: 0,
-				// 	process: [
-				// 		// { convolutionFilter: [
-				// 		// 	
-				// 		// ] }
-				// 		{ grayscale: {
-				// 			xPctStart: 40,
-				// 		} },
-
-				// 		{ grayscale: {
-				// 			xPctStart: 5,
-			 //                xPctEnd: 95,
-			 //                yPctStart: 5,
-			 //                yPctEnd: 15
-				// 		} },
-
-				// 		{ grayscale: {
-				// 			xPctStart: 5,
-			 //                xPctEnd: 95,
-			 //                yPctStart: 20,
-			 //                yPctEnd: 35
-				// 		} },
-
-				// 		// { sobel: {} }
-				// 		// { hue: { value: 5 } },
-				// 		// { saturation: { value: -20, colorize: false } },
-				// 		// { vignette: { 
-				// 		// 	opacity: 0.5,
-				// 		// 	size: 0.2  
-				// 		// } },
-				// 		{ contrast: 10 },
-				// 		// { pixelate: 4.5 },
-				// 		// { boxBlur: { radius: 10 } },
-				// 		{ gaussianBlur: { 
-				// 			radius: 10,
-				// 			xPctStart: 20,
-				// 		} },
-				// 	],
-				// 	sharedOptions: {
-				// 		xPctStart: 10,
-		  //               xPctEnd: 80,
-		  //               yPctStart: 50,
-		  //               yPctEnd: 90
-				// 	}
-				// });
-
-				// $(".toCanvas-lomo").toCanvas({
-				// 	process: [
-				// 		{ brightness: { value: -5 } },
-				// 		{ saturation: { value: 20 } },
-				// 		{ gamma: { value: 1.4 } },
-				// 		{ vignette: { opacity: 0.8 } },
-				// 		{ brightness: { value: 5 } }
-				// 	]
-				// });
 
 
 				$('#loader').delay(500).fadeOut();
+
+				$('.example').prepend('<a href="#top" class="totop">^</a>');
+
+				var $root = $('html, body');
+				$('a[href*=#]').on('click', function(event){     
+    				event.preventDefault();
+    				var hash = this.hash
+				    $root.animate({
+				    	scrollTop: $(hash).offset().top
+				    }, 500,	 function () {
+       					window.location.hash = hash;
+    				});
+				});
 			});
 		</script>
 	</body>

@@ -1,3 +1,7 @@
+* {
+	box-sizing: border-box;
+}
+
 html, body {
 	height: 100%;
 	padding: 0;
@@ -10,6 +14,15 @@ body {
 	font-family: 'Raleway', sans-serif;
 	text-align: center;
 }
+
+a {
+	color: #333;
+	transition: 500ms all;
+}
+	a:hover {
+		text-decoration: none;
+		text-shadow: 0px 1px 2px #666;
+	}
 
 h1 {
 	font-size: 3em;
@@ -27,13 +40,24 @@ p {
 }
 
 pre[class*="language-"] {
-	max-width: 368px;
+	max-width: 400px;
 	margin: 1em auto;
 }
 
 canvas {
 	transition: all 0.8s;
 }
+
+ul {
+	max-width: 400px;
+	text-align: left;
+	display: block;
+	margin: 1em auto;
+	padding-left: 2em;
+}
+	li {
+		list-style-position: inside;
+	}
 
 video {
 	display: block;
@@ -64,12 +88,37 @@ video {
 }
 
 .wrapper {
-	padding: 30px;
 }
 
 .intro {}
 
 .example {
-	margin: 0 auto;
+	margin: 1em auto;
+	padding: 1em;
+	position: relative;
 	text-align: center;
+	width: 100%;
 }
+	.example:nth-child(even) { 
+		background: #ddd;
+		box-shadow: 0px 0px 10px #ccc inset;
+	}
+	.example:nth-child(odd)  { 
+		background: #eee;
+	}
+
+.totop {
+	background: #ccc;
+	border-radius: 50%;
+	display: block;
+	font-weight: bold;
+	height: 1.5em;
+	line-height: 2em;
+	margin: 0 auto 0.5em;
+	padding-left: 1px;
+	text-decoration: none;
+	width: 1.5em;
+}
+	.totop:hover {
+		box-shadow: 0px 3px 4px #333;
+	}

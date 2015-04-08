@@ -179,6 +179,7 @@
 
                 var modifier = Object.keys(modifierObj)[0];
                 var options = modifierObj[modifier];
+                //console.log(modifier);
                 tc[modifier](options);
 
                 tc.putImageData();
@@ -197,7 +198,6 @@
 
         putImageData: function() {
             this.context.putImageData(this.imgdOut, 0, 0);
-            this.imgdIn   = this.imgdOut;
             this.imgdIn   = this.context.getImageData(0, 0, this.w, this.h); // get data from 2D context
             this.pixelsIn = this.imgdIn.data;
             this.nrPixels = this.pixelsIn.length;

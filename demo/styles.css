@@ -122,3 +122,19 @@ video {
 	.totop:hover {
 		box-shadow: 0px 3px 4px #333;
 	}
+
+.playground {
+	margin: 1em auto;
+	max-width: 400px;
+}
+	.playground p {
+		text-align: left;
+	}
+	.playground input[type='text'] {
+		background: transparent;
+		border: none;
+		font-weight: bold;
+	}
+	.playground .slider {
+		margin-bottom: 1em;
+	}

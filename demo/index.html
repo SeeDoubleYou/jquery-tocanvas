@@ -3,9 +3,8 @@
 	<head>
 		<title>jQuery toCanvas Plugin</title>
 		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-		<script src="../src/jquery.tocanvas.js"></script>
 		<link href="//fonts.googleapis.com/css?family=Raleway:400,700" rel="stylesheet" type="text/css" />
+		<link href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/themes/smoothness/jquery-ui.css" rel="stylesheet" type="text/css" />
 		<link href="prism.css" rel="stylesheet" type="text/css" />
 		<link href="styles.css" rel="stylesheet" type="text/css" />
 	</head>
@@ -61,7 +60,11 @@ sharedOptions: { // object with options that are re-used for all processed effec
 					Setting it up is easy! Simply <a href="https://github.com/SeeDoubleYou/jquery-tocanvas">download the project from the github page</a>, include it on the page and use it like the examples below.
 				</p>
 
-				<iframe id="forkframe" src="https://ghbtns.com/github-btn.html?user=seedoubleyou&repo=jquery-tocanvas&type=fork&count=true" frameborder="0" scrolling="0" width="170px" height="20px"></iframe>
+				<p>
+					Feature-requests are more than welcome. Pull requests are even better! We may build <a href="#example-playground">the next online image editor together</a>.
+				</p>
+
+				<iframe id="forkframe" src="https://ghbtns.com/github-btn.html?user=seedoubleyou&amp;repo=jquery-tocanvas&amp;type=fork&amp;count=true" frameborder="0" scrolling="0" width="170px" height="20px"></iframe>
 			</div>
 
 			<div class="example">
@@ -208,6 +211,69 @@ $('.toCanvas-video').toCanvas({
 			</div>
 		</div>
 
+		<!-- --------------------------------------------------------------- -->
+
+			<div class="example" id="example-playground">
+				<h2>Playground</h2>
+				<p>
+					this is a very simple "playground" to show you how you can use toCanvas to build your own online photoshop. Not really though.
+				</p>
+				<pre><code class="language-javascript">
+var playgroundOptions = {
+	hoverOpacity: 0,
+	process: [
+		{ threshold: {
+			threshold: $( "#pg-threshold" ).val()
+		} }
+	],
+	sharedOptions: {
+		opacity: $( "#pg-opacity" ).val()
+	}
+};
+
+$playground = $(".toCanvas-playground").toCanvas(playgroundOptions);
+
+$('#pg-threshold-slider').slider({
+	value: $( "#pg-threshold" ).val(),
+	min:   0,
+	max:   255,
+	slide: function( event, ui ) {
+		$( "#pg-threshold" ).val( ui.value );
+		playgroundOptions.process[0].threshold.threshold = ui.value;
+		$playground.render();
+	}
+});
+
+$('#pg-opacity-slider').slider({
+	value: $( "#pg-opacity" ).val(),
+	min:   0,
+	max:   1,
+	step:  0.01,
+	slide: function( event, ui ) {
+		$( "#pg-opacity" ).val( ui.value );
+		playgroundOptions.sharedOptions.opacity = ui.value;
+		$playground.render();
+	}
+});</code></pre>
+				<img src="ny_view.jpg" class="toCanvas-playground" />
+				<div class="playground">
+					<p>
+						<label for="pg-threshold">Threshold: </label>
+						<input type="text" id="pg-threshold" value="127" readonly />
+					</p>
+					<div class="slider" id="pg-threshold-slider"></div>
+
+					<p>
+						<label for="pg-opacity">Opacity: </label>
+						<input type="text" id="pg-opacity" value="0.5" readonly />
+					</p>
+					<div class="slider" id="pg-opacity-slider"></div>
+				</div>
+			</div>
+
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+		<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script>
+		<script src="../src/jquery.tocanvas.js"></script>
 		<script src="prism.js"></script>
 		<script>
 			$(function() {
@@ -279,11 +345,49 @@ $('.toCanvas-video').toCanvas({
 				});
 
 				$('.toCanvas-video').toCanvas({
-					framerate: 10,
+					//framerate: 10,
 					overlay: false,
 					process: [
-						{ invert: {} },					]
+						{ invert: {} },					
+					]
 				});
+
+				var playgroundOptions = {
+					hoverOpacity: 0,
+					process: [
+						{ threshold: {
+							threshold: $( "#pg-threshold" ).val()
+						} }
+					],
+					sharedOptions: {
+						opacity: $( "#pg-opacity" ).val()
+					}
+				};
+
+				$playground = $(".toCanvas-playground").toCanvas(playgroundOptions);
+
+				$('#pg-threshold-slider').slider({
+					value: $( "#pg-threshold" ).val(),
+					min:   0,
+					max:   255,
+					slide: function( event, ui ) {
+						$( "#pg-threshold" ).val( ui.value );
+						playgroundOptions.process[0].threshold.threshold = ui.value;
+						$playground.render();
+					}
+    			});
+
+    			$('#pg-opacity-slider').slider({
+					value: $( "#pg-opacity" ).val(),
+					min:   0,
+					max:   1,
+					step:  0.01,
+					slide: function( event, ui ) {
+						$( "#pg-opacity" ).val( ui.value );
+						playgroundOptions.sharedOptions.opacity = ui.value;
+						$playground.render();
+					}
+    			});
 
 
 				$('#loader').delay(500).fadeOut();

@@ -68,7 +68,7 @@
         this.settings = $.extend( {}, defaults, options );
         this._defaults = defaults;
         this._name = pluginName;
-        this.init();
+        return this.init();
     }
 
     // Avoid Plugin.prototype conflicts
@@ -92,8 +92,10 @@
                 tc.$element.trigger("play");
             }
             else {
-                return; //incorrect source
+                return false; //incorrect source
             }
+
+            return tc;
         },
 
         setup: function() {
@@ -139,8 +141,6 @@
                     width: tc.w
                 })
             ;
-            
-            tc.$element.addClass("tc_image");
 
             if(tc.settings.overlay) {
                 tc.$element.wrap(tc.$wrapper);
@@ -150,11 +150,13 @@
             }
 
             tc.context = this.canvas.getContext("2d");
+
+            return tc;
         },
 
         /**
          * Render all effects, overlays, filters, etc.
-         * @return {[type]} [description]
+         * @return this
          */
         render: function() {
             var tc = this;
@@ -163,29 +165,13 @@
                 return false;
             }
 
-            if(!tc.settings.continuous || tc.renderCount === 0) {
-                tc.context.drawImage(tc.imageObj, 0, 0, tc.w, tc.h); // draw image to canvas
-            }
-            tc.imgdIn   = tc.context.getImageData(0, 0, tc.w, tc.h); // get data from 2D context  
-            tc.pixelsIn = tc.imgdIn.data;
-            tc.nrPixels = tc.pixelsIn.length;  
+            tc.draw();
 
             $.each(tc.settings.process, function(index, modifierObj) {
-                // we make a copy so that effects use 'in' during calculation
-                // and 'out' when writing data
-                
-                tc.imgdOut   = tc.context.getImageData(0, 0, tc.w, tc.h); // get data from 2D context  
-                tc.pixelsOut = tc.imgdOut.data;
-
                 var modifier = Object.keys(modifierObj)[0];
                 var options = modifierObj[modifier];
-                //console.log(modifier);
                 tc[modifier](options);
-
-                tc.putImageData();
             });
-
-           
 
             tc.renderCount++;
             
@@ -194,6 +180,21 @@
                     tc.render();
                 }, 1000/tc.settings.framerate);
             }
+
+            return tc;
+        },
+
+        draw: function() {
+            this.context.drawImage(this.imageObj, 0, 0, this.w, this.h); // draw image to canvas
+            this.imgdIn   = this.context.getImageData(0, 0, this.w, this.h); // get data from 2D context  
+            this.pixelsIn = this.imgdIn.data;
+            this.nrPixels = this.pixelsIn.length;
+
+            // we make a copy so that effects use 'in' during calculation
+            // and 'out' when writing data
+            this.imgdOut   = this.context.getImageData(0, 0, this.w, this.h); // get data from 2D context  
+            this.pixelsOut = this.imgdOut.data;  
+            return this;
         },
 
         putImageData: function() {
@@ -201,6 +202,10 @@
             this.imgdIn   = this.context.getImageData(0, 0, this.w, this.h); // get data from 2D context
             this.pixelsIn = this.imgdIn.data;
             this.nrPixels = this.pixelsIn.length;
+            this.imgdOut   = this.context.getImageData(0, 0, this.w, this.h); // get data from 2D context  
+            this.pixelsOut = this.imgdOut.data;
+
+            return this;
         },
 
         /**
@@ -239,6 +244,9 @@
                     this.pixelsOut[i+3] = options.opacity * processed[3]; 
                 }    
             }
+
+            this.putImageData();
+
             return this;
         },
 
@@ -351,6 +359,8 @@
             tc.pixelsOut = tc.imgdOut.data;
 
             tc.putImageData();
+
+            return tc;
         },
 
         /**
@@ -557,6 +567,8 @@
             // make sure other effect get the updated data
             this.imgdOut   = this.context.getImageData(0, 0, this.w, this.h);
             this.pixelsOut = this.imgdOut.data;
+
+            return this;
         },
 
 
@@ -582,19 +594,19 @@
         },
 
         hue: function(options) {
-            this.hslUpdate("h", options);
+            return this.hslUpdate("h", options);
         },
 
         saturation: function(options) {
-            this.hslUpdate("s", options);
+            return this.hslUpdate("s", options);
         },
 
         brightness: function(options) {
-            this.lightness(options);
+            return this.lightness(options);
         },
 
         lightness: function(options) {
-            this.hslUpdate("l", options);
+            return this.hslUpdate("l", options);
         },
 
         hslUpdate: function(axis, options) {
@@ -748,16 +760,20 @@
     // A really lightweight plugin wrapper around the constructor,
     // preventing against multiple instantiations
     $.fn[ pluginName ] = function ( options ) {
+        var plugin;
         var canvas2DSupported = !!window.CanvasRenderingContext2D;
         if(!canvas2DSupported) {
-            return;
+            return false;
         }
 
-        return this.each(function() {
-            if ( !$.data( this, "plugin_" + pluginName ) ) {
-                $.data( this, "plugin_" + pluginName, new Plugin( this, options ) );
+        this.each(function() {
+            plugin = $.data(this, "plugin_" + pluginName);
+            if (!plugin) {
+                plugin = new Plugin(this, options);
+                $.data(this, "plugin_" + pluginName, plugin);
             }
         });
+        return plugin;
     };
 
 })( jQuery, window, document );

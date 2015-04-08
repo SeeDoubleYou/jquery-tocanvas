@@ -203,7 +203,7 @@ $('.toCanvas-video').toCanvas({
 	]
 });</code></pre>
 
-				<video class="toCanvas-video" width="400" height="225" controls autoplay loop muted>
+				<video class="toCanvas-video" width="400" height="225" controls loop muted>
 					<source src="big_buck_bunny.mp4" type="video/mp4" />
 					<source src="big_buck_bunny.webm" type="video/webm" />
 					<source src="big_buck_bunny.ogv" type="video/ogg" />
@@ -345,7 +345,7 @@ $('#pg-opacity-slider').slider({
 				});
 
 				$('.toCanvas-video').toCanvas({
-					//framerate: 10,
+					framerate: 24,
 					overlay: false,
 					process: [
 						{ invert: {} },					

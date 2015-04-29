@@ -49,8 +49,18 @@
 
     // Avoid Plugin.prototype conflicts
     $.extend(Plugin.prototype, {
+
+        /**
+         * Called when plugin is created. Initial setup.
+         *
+         * @return {obj}    this
+         */
         init: function () {
-            var tc = this;
+            var tc = this; // tc stands for ToCanvas and is used as a context var throughout the plugins methods
+
+            // if the element is an image, create an image object with the same source.
+            // Wait for the image object to load so that we know its dimensions
+            // then perform setup and render the canvas
             if(tc.$element.is("img")) {
                 tc.imageObj = new Image();
                 tc.imageObj.onload = function() {
@@ -59,6 +69,9 @@
                 };
                 tc.imageObj.src = this.$element.attr("src");
             }
+
+            // Not an image? Video then (html5)? If so, awesome, let's use the video element as the image object
+            // Then run the setup, and make sure the canvas is render when the video starts to play
             else if(tc.$element.is("video")) {
                 tc.imageObj = tc.element;
                 tc.setup();
@@ -67,18 +80,28 @@
                 });
                 //tc.$element.trigger("play");
             }
+
+            // Not an image and not an video? Out of luck you are!
             else {
                 return false; //incorrect source
             }
 
+            // return this to allow chaining
             return tc;
         },
 
+        /**
+         * Called when the object (img or video) is loaded. Do setup based on
+         * object properties
+         *
+         * @return {obj}    this
+         */
         setup: function() {
             var tc = this;
             tc.w = tc.$element.width();
             tc.h = tc.$element.height();
 
+            // add a wrapper so we can position the canvas on top of the image (when set as overlay)
             tc.$wrapper
                 .addClass("tc_wrapper")
                 .css({
@@ -89,6 +112,7 @@
                 })
             ;
 
+            // create an abject for the canvas css based on the overlay setting
             var canvasCSS = tc.settings.overlay ? {
                 left: 0,
                 opacity: tc.settings.opacity,
@@ -98,9 +122,13 @@
             } : {
                 opacity: tc.settings.opacity,
             };
+
+            // create the canvas itself
             tc.$canvas
-                .addClass("tc_canvas")
+                .addClass("tc_canvas") // @todo: maybe nice to have this as a setting?
                 .css(canvasCSS)
+
+                // update opacity on hover
                 .hover(function() {
                     $(this).css({
                         opacity: tc.settings.hoverOpacity
@@ -110,6 +138,7 @@
                         opacity: tc.settings.opacity
                     });
                 })
+
                 .attr({
                     // width and height need to be set as attributes
                     // so that the coordinate system is set correctly
@@ -132,7 +161,8 @@
 
         /**
          * Render all effects, overlays, filters, etc.
-         * @return this
+         *
+         * @return {obj}    this
          */
         render: function() {
             var tc = this;
@@ -160,6 +190,11 @@
             return tc;
         },
 
+        /**
+         * Draw the contents of this.element to canvas en reset internal pixel data
+         *
+         * @return {obj}    this
+         */
         draw: function() {
             this.context.drawImage(this.imageObj, 0, 0, this.w, this.h); // draw image to canvas
             this.imgdIn   = this.context.getImageData(0, 0, this.w, this.h); // get data from 2D context
@@ -173,6 +208,11 @@
             return this;
         },
 
+        /**
+         * draw the current pixel-data to the canvas and read the new pixel information from result
+         *
+         * @return {obj}    this
+         */
         putImageData: function() {
             this.context.putImageData(this.imgdOut, 0, 0);
             this.imgdIn   = this.context.getImageData(0, 0, this.w, this.h); // get data from 2D context
@@ -200,12 +240,15 @@
                 yPctEnd: 100,
             }, this.settings.sharedOptions, options);
 
+            // calculate begin and end pixels from percentage settings
             var xStart = Math.round(options.xPctStart * (this.w/100));
             var xEnd   = Math.round(options.xPctEnd   * (this.w/100));
             var yStart = Math.round(options.yPctStart * (this.h/100));
             var yEnd   = Math.round(options.yPctEnd   * (this.h/100));
 
+            // loop over x-axis from start to end
             for (var x = xStart; x < xEnd; x++) {
+                // loop over y-axis from start to end
                 for (var y = yStart; y < yEnd; y++) {
                     var i = 4*(y*this.w + x);
                     var r = this.pixelsIn[i],
@@ -213,7 +256,10 @@
                         b = this.pixelsIn[i+2],
                         a = this.pixelsIn[i+3]
                     ;
+                    // get processed pixel object from callback
                     var processed = callback(r, g, b, a, x, y, i);
+
+                    // set pixel values from prosessed data
                     this.pixelsOut[i]   = processed[0];
                     this.pixelsOut[i+1] = processed[1];
                     this.pixelsOut[i+2] = processed[2];
@@ -249,7 +295,7 @@
         },
 
         /**
-         * Convert pixeld to sepia color
+         * Convert pixels to sepia color
          * @return {array} r, g, b, a
          */
         sepia: function(options) {
@@ -290,6 +336,12 @@
             }, options);
         },
 
+        /**
+         * Add randomized noise
+         *
+         * @param  {obj}    options
+         * @return {obj}    this
+         */
         noise: function(options) {
             options = $.extend({}, {
                 amount: 10,

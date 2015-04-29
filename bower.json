@@ -5,7 +5,7 @@
 	"authors": [
 		"Cees-Willem Hofstede <ceeswillem@gmail.com>"
 	],
-	"description": "A jquery plugin to overlay any img with a canvas to add effects to it",
+	"description": "A jquery plugin to overlay/append any img or html5 video with a canvas to add effects to it",
 	"main": "src/jquery.tocanvas.js",
 	"keywords": [
 		"jquery",

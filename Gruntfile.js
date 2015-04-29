@@ -53,17 +53,30 @@ module.exports = function(grunt) {
 		watch: {
 		    files: ['src/*'],
 		    tasks: ['default']
-		}
+		},
 
+		jsdox: {
+		    generate: {
+				options: {
+					contentsEnabled: true,
+					contentsTitle: 'Documentation',
+				},
+
+				src: ['src/jquery.tocanvas.js'],
+				dest: 'docs/md'
+		    },
+		}
 	});
 
 	grunt.loadNpmTasks("grunt-contrib-concat");
 	grunt.loadNpmTasks("grunt-contrib-jshint");
 	grunt.loadNpmTasks("grunt-contrib-uglify");
 	grunt.loadNpmTasks("grunt-contrib-watch");
+	grunt.loadNpmTasks('grunt-jsdox');
 
 	grunt.registerTask("build", ["concat", "uglify"]);
 	grunt.registerTask("default", ["jshint", "build"]);
 	grunt.registerTask("travis", ["default"]);
+	grunt.registerTask("doc", ["jsdox:generate"]);
 
 };

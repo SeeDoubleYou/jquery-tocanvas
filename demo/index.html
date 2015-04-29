@@ -128,7 +128,7 @@ $(".toCanvas-gauss").toCanvas({
 			</div>
 
 			<!-- --------------------------------------------------------------- -->
-			
+
 			<div class="example" id="example-customconvolution">
 				<h2>Custom convolution filter</h2>
 				<p>
@@ -173,7 +173,7 @@ process: [
 		yPctEnd: 80,
 		opacity: 0.9
 	} },
-	{ gaussianBlur: { 
+	{ gaussianBlur: {
 		radius: 10,
 		xPctStart: 15,
 		xPctEnd: 50,
@@ -305,7 +305,7 @@ $('#pg-opacity-slider').slider({
 				$(".toCanvas-move").toCanvas({
 					hoverOpacity: 0,
 					process: [
-						{ convolutionFilter: { 
+						{ convolutionFilter: {
 							filter: [
 								[1/9, 0, 0, 0, 0, 0, 0, 0, 0],
 							    [0, 1/9, 0, 0, 0, 0, 0, 0, 0],
@@ -332,7 +332,7 @@ $('#pg-opacity-slider').slider({
 							yPctEnd: 80,
 							opacity: 0.9
 						} },
-						{ gaussianBlur: { 
+						{ gaussianBlur: {
 							radius: 10,
 							xPctStart: 15,
 							xPctEnd: 50,
@@ -348,7 +348,7 @@ $('#pg-opacity-slider').slider({
 					framerate: 24,
 					overlay: false,
 					process: [
-						{ invert: {} },					
+						{ invert: {} },
 					]
 				});
 
@@ -395,7 +395,7 @@ $('#pg-opacity-slider').slider({
 				$('.example').prepend('<a href="#top" class="totop">^</a>');
 
 				var $root = $('html, body');
-				$('a[href*=#]').on('click', function(event){     
+				$('a[href*=#]').on('click', function(event){
     				event.preventDefault();
     				var hash = this.hash
 				    $root.animate({

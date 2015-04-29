@@ -228,7 +228,7 @@
          * Process a callback for each pixel.
          * We loop over all pixels and call the callback for each
          *
-         * @param  {Function} callback The callback must return an array [r, g, b, a]
+         * @param  {function} callback The callback must return an array [r, g, b, a]
          * @return {obj}      this
          */
         process: function(callback, options) {
@@ -280,6 +280,8 @@
 
         /**
          * Convert pixels to a pure gray value
+         *
+         * @param  {obj}    options
          * @return {array} r, g, b, a
          */
         grayscale: function(options) {
@@ -296,6 +298,8 @@
 
         /**
          * Convert pixels to sepia color
+         *
+         * @param  {obj}    options
          * @return {array} r, g, b, a
          */
         sepia: function(options) {
@@ -311,6 +315,8 @@
 
         /**
          * Invert r, g and by by subtracting original values from 255
+         *
+         * @param  {obj}    options
          * @return {array} r, g, b, a
          */
         invert: function(options) {
@@ -324,6 +330,12 @@
             }, options);
         },
 
+        /**
+         * Find edges
+         *
+         * @param  {obj}    options
+         * @return {array} r, g, b, a
+         */
         edges: function(options) {
             var tc = this;
             var rowShift = tc.w*4;
@@ -340,7 +352,7 @@
          * Add randomized noise
          *
          * @param  {obj}    options
-         * @return {obj}    this
+         * @return {array} r, g, b, a
          */
         noise: function(options) {
             options = $.extend({}, {
@@ -356,6 +368,11 @@
             }, options);
         },
 
+        /**
+         * [pixelate description]
+         * @param  {obj}    options
+         * @return {array} r, g, b, a
+         */
         pixelate: function(options) {
             var tc = this;
 
@@ -397,6 +414,10 @@
         * --------------------------------------------------------------------------------
         */
 
+        /**
+         * @param  {obj}    options
+         * @return {array} r, g, b, a
+         */
         blur: function(options) {
             return this.convolutionFilter([
                 [0.1, 0.1, 0.1],
@@ -405,6 +426,10 @@
             ], options);
         },
 
+        /**
+         * @param  {obj}    options
+         * @return {array} r, g, b, a
+         */
         boxBlur: function(options) {
             options = $.extend({}, {
                 radius: 3
@@ -426,6 +451,10 @@
             return this.convolutionFilter(filter, options);
         },
 
+        /**
+         * @param  {obj}    options
+         * @return {array} r, g, b, a
+         */
         gaussianBlur: function(options) {
             options = $.extend({}, {
                 radius: 3
@@ -460,6 +489,10 @@
             return this.convolutionFilter(options);
         },
 
+        /**
+         * @param  {obj}    options
+         * @return {array} r, g, b, a
+         */
         sharpen: function(options) {
             return this.convolutionFilter($.extend({}, {
                 filter: [
@@ -470,6 +503,10 @@
             }, options));
         },
 
+        /**
+         * @param  {obj}    options
+         * @return {array} r, g, b, a
+         */
         emboss: function(options) {
             options = $.extend({}, {
                 offset: 127
@@ -484,6 +521,10 @@
             }, options));
         },
 
+        /**
+         * @param  {obj}    options
+         * @return {array} r, g, b, a
+         */
         laplace: function(options) {
             return this.convolutionFilter($.extend({}, {
                 filter: [
@@ -494,12 +535,20 @@
             }, options));
         },
 
+        /**
+         * @param  {obj}    options
+         * @return {array} r, g, b, a
+         */
         sobel: function(options) {
             this.sobelVertical(options);
             this.putImageData();
             return this.sobelHorizontal(options);
         },
 
+        /**
+         * @param  {obj}    options
+         * @return {array} r, g, b, a
+         */
         sobelVertical: function(options) {
             return this.convolutionFilter($.extend({}, {
                 filter: [
@@ -510,6 +559,10 @@
             }, options));
         },
 
+        /**
+         * @param  {obj}    options
+         * @return {array} r, g, b, a
+         */
         sobelHorizontal: function(options) {
             return this.convolutionFilter($.extend({}, {
                 filter: [
@@ -520,6 +573,10 @@
             }, options));
         },
 
+        /**
+         * @param  {obj}    options
+         * @return {array} r, g, b, a
+         */
         convolutionFilter: function(options) {
             options = $.extend({}, {
                 updateR: true,
@@ -574,6 +631,12 @@
         * --------------------------------------------------------------------------------
         */
 
+        /**
+         * Add a vignette
+         *
+         * @param  {obj}    options
+         * @return {obj}    this
+         */
         vignette: function(options) {
             options = $.extend( {}, {
                 size: 0.5,
@@ -605,6 +668,11 @@
          *            ADJUSTMENTS
          * --------------------------------------------------------------------------------
          */
+
+        /**
+         * @param  {obj}    options
+         * @return {array} r, g, b, a
+         */
         threshold: function(options) {
             options = $.extend({}, {
                 threshold: 127,
@@ -621,18 +689,34 @@
             }, options);
         },
 
+        /**
+         * @param  {obj}    options
+         * @return {array} r, g, b, a
+         */
         hue: function(options) {
             return this.hslUpdate("h", options);
         },
 
+        /**
+         * @param  {obj}    options
+         * @return {array} r, g, b, a
+         */
         saturation: function(options) {
             return this.hslUpdate("s", options);
         },
 
+        /**
+         * @param  {obj}    options
+         * @return {array} r, g, b, a
+         */
         brightness: function(options) {
             return this.lightness(options);
         },
 
+        /**
+         * @param  {obj}    options
+         * @return {array} r, g, b, a
+         */
         lightness: function(options) {
             return this.hslUpdate("l", options);
         },
@@ -680,6 +764,10 @@
             }, options);
         },
 
+        /**
+         * @param  {obj}    options
+         * @return {array} r, g, b, a
+         */
         contrast: function(options) {
             options = $.extend({}, {
                 value: 10,
@@ -696,6 +784,10 @@
             }, options);
         },
 
+        /**
+         * @param  {obj}    options
+         * @return {array} r, g, b, a
+         */
         gamma: function(options) {
             options = $.extend({}, {
                 value: 1.5,

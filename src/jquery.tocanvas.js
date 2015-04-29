@@ -152,7 +152,7 @@
          */
         render: function() {
             var tc = this;
-            
+
             if(tc.imageObj.paused || tc.imageObj.ended) {
                 return false;
             }
@@ -166,7 +166,7 @@
             });
 
             tc.renderCount++;
-            
+
             if(tc.settings.framerate > 0) {
                 window.setTimeout(function() {
                     tc.render();
@@ -178,14 +178,14 @@
 
         draw: function() {
             this.context.drawImage(this.imageObj, 0, 0, this.w, this.h); // draw image to canvas
-            this.imgdIn   = this.context.getImageData(0, 0, this.w, this.h); // get data from 2D context  
+            this.imgdIn   = this.context.getImageData(0, 0, this.w, this.h); // get data from 2D context
             this.pixelsIn = this.imgdIn.data;
             this.nrPixels = this.pixelsIn.length;
 
             // we make a copy so that effects use 'in' during calculation
             // and 'out' when writing data
-            this.imgdOut   = this.context.getImageData(0, 0, this.w, this.h); // get data from 2D context  
-            this.pixelsOut = this.imgdOut.data;  
+            this.imgdOut   = this.context.getImageData(0, 0, this.w, this.h); // get data from 2D context
+            this.pixelsOut = this.imgdOut.data;
             return this;
         },
 
@@ -194,7 +194,7 @@
             this.imgdIn   = this.context.getImageData(0, 0, this.w, this.h); // get data from 2D context
             this.pixelsIn = this.imgdIn.data;
             this.nrPixels = this.pixelsIn.length;
-            this.imgdOut   = this.context.getImageData(0, 0, this.w, this.h); // get data from 2D context  
+            this.imgdOut   = this.context.getImageData(0, 0, this.w, this.h); // get data from 2D context
             this.pixelsOut = this.imgdOut.data;
 
             return this;
@@ -203,7 +203,7 @@
         /**
          * Process a callback for each pixel.
          * We loop over all pixels and call the callback for each
-         * 
+         *
          * @param  {Function} callback The callback must return an array [r, g, b, a]
          * @return {obj}      this
          */
@@ -233,8 +233,8 @@
                     this.pixelsOut[i]   = processed[0];
                     this.pixelsOut[i+1] = processed[1];
                     this.pixelsOut[i+2] = processed[2];
-                    this.pixelsOut[i+3] = options.opacity * processed[3]; 
-                }    
+                    this.pixelsOut[i+3] = options.opacity * processed[3];
+                }
             }
 
             this.putImageData();
@@ -245,7 +245,7 @@
         /**
          * --------------------------------------------------------------------------------
          *            EFFECTS
-         * -------------------------------------------------------------------------------- 
+         * --------------------------------------------------------------------------------
          */
 
         /**
@@ -256,9 +256,9 @@
             return this.process(function(r, g, b, a) {
                 var grayscale = r * 0.3 + g * 0.59 + b * 0.11;
                 return [
-                    grayscale, 
-                    grayscale, 
-                    grayscale, 
+                    grayscale,
+                    grayscale,
+                    grayscale,
                     a
                 ];
             }, options);
@@ -271,9 +271,9 @@
         sepia: function(options) {
             return this.process(function(r, g, b, a) {
                 return [
-                    (r * 0.393)+(g * 0.769)+(b * 0.189), 
-                    (r * 0.349)+(g * 0.686)+(b * 0.168), 
-                    (r * 0.272)+(g * 0.534)+(b * 0.131), 
+                    (r * 0.393)+(g * 0.769)+(b * 0.189),
+                    (r * 0.349)+(g * 0.686)+(b * 0.168),
+                    (r * 0.272)+(g * 0.534)+(b * 0.131),
                     a
                 ];
             }, options);
@@ -301,7 +301,7 @@
                 r = 127 + 2*r - tc.pixels[i + 4] - tc.pixels[i   + rowShift];
                 g = 127 + 2*g - tc.pixels[i + 5] - tc.pixels[i+1 + rowShift];
                 b = 127 + 2*b - tc.pixels[i + 6] - tc.pixels[i+2 + rowShift];
-           
+
                 return [r, g, b, a];
             }, options);
         },
@@ -312,9 +312,9 @@
             }, options);
             return this.process(function(r, g, b, a) {
                 return [
-                    r + (0.5 - Math.random()) * options.amount, 
-                    g + (0.5 - Math.random()) * options.amount, 
-                    b + (0.5 - Math.random()) * options.amount, 
+                    r + (0.5 - Math.random()) * options.amount,
+                    g + (0.5 - Math.random()) * options.amount,
+                    b + (0.5 - Math.random()) * options.amount,
                     a
                 ];
             }, options);
@@ -345,7 +345,7 @@
             tc.imgdIn   = tc.context.getImageData(0, 0, tc.w, tc.h); // get data from 2D context
             tc.pixelsIn = tc.imgdIn.data;
             tc.nrPixels = tc.pixelsIn.length;
-            
+
             // make sure other effect get the updated data
             tc.imgdOut   = tc.context.getImageData(0, 0, tc.w, tc.h);
             tc.pixelsOut = tc.imgdOut.data;
@@ -358,9 +358,9 @@
         /**
         * --------------------------------------------------------------------------------
         *           CONVULUTION FILTERS
-        * -------------------------------------------------------------------------------- 
+        * --------------------------------------------------------------------------------
         */
-        
+
         blur: function(options) {
             return this.convolutionFilter([
                 [0.1, 0.1, 0.1],
@@ -384,7 +384,7 @@
                 for(var c = 0; c < radius; c++) {
                     row.push(val);
                 }
-                filter.push(row);   
+                filter.push(row);
             }
 
             return this.convolutionFilter(filter, options);
@@ -401,7 +401,7 @@
             var sum = 0.0; // For accumulating the filter values
             var filter = [];
             for (var x = 0; x < size; ++x) {
-                var row = []; 
+                var row = [];
                 for (var y = 0; y < size; ++y) {
                     var col = this.gaussian(x, radius, sigma) * this.gaussian(y, radius, sigma);
                     row.push(col);
@@ -504,7 +504,7 @@
             var cm = Math.floor(cols/2); // center of column (current pixel)
 
             return tc.process(function(r, g, b, a, x, y, i) {
-                
+
                 var nR = options.updateR ? 0 : tc.pixelsIn[i  ],
                     nG = options.updateG ? 0 : tc.pixelsIn[i+1],
                     nB = options.updateB ? 0 : tc.pixelsIn[i+2]
@@ -515,7 +515,7 @@
                     var ri = (row < rm ? -rd : (row > rm ? +rd : 0));
 
                     var nY = Math.max(Math.min(y+ri, tc.h-1), 0);
-                    
+
                     for(var col = 0; col < cols; col++) {
                         var cd = Math.abs(col-cm);
                         var ci = (col < cm ? -cd : (col > cm ? +cd : 0));
@@ -526,7 +526,7 @@
                         if(options.updateR) { nR += (filter[row][col] * tc.pixelsIn[nI  ]); }
                         if(options.updateG) { nG += (filter[row][col] * tc.pixelsIn[nI+1]); }
                         if(options.updateB) { nB += (filter[row][col] * tc.pixelsIn[nI+2]); }
-                    }     
+                    }
                 }
                 return [options.offset + nR, options.offset + nG, options.offset + nB, a];
             }, options);
@@ -535,7 +535,7 @@
         /**
         * --------------------------------------------------------------------------------
         *            OVERLAYS
-        * -------------------------------------------------------------------------------- 
+        * --------------------------------------------------------------------------------
         */
 
         vignette: function(options) {
@@ -546,7 +546,7 @@
 
             var outerRadius = Math.sqrt( Math.pow(this.w / 2, 2) + Math.pow(this.h / 2, 2) );
             var gradient = this.context.createRadialGradient(this.w/2, this.h/2, 0, this.w/2, this.h/2, outerRadius);
-            
+
             // write current data to image so we can overlay the vignette
             this.context.putImageData(this.imgdOut, 0, 0);
             this.context.globalCompositeOperation = "source-over";
@@ -567,7 +567,7 @@
         /**
          * --------------------------------------------------------------------------------
          *            ADJUSTMENTS
-         * -------------------------------------------------------------------------------- 
+         * --------------------------------------------------------------------------------
          */
         threshold: function(options) {
             options = $.extend({}, {
@@ -634,7 +634,7 @@
                 }
 
                 var rgb = tc.hsl2rgb(hsl.h, hsl.s, hsl.l);
-                
+
                 return [
                     rgb.r,
                     rgb.g,
@@ -652,9 +652,9 @@
             var level = Math.pow((options.value + 100) / 100, 2);
             return this.process(function(r, g, b, a) {
                 return [
-                    ((r / 255 - 0.5) * level + 0.5) * 255, 
-                    ((g / 255 - 0.5) * level + 0.5) * 255, 
-                    ((b / 255 - 0.5) * level + 0.5) * 255, 
+                    ((r / 255 - 0.5) * level + 0.5) * 255,
+                    ((g / 255 - 0.5) * level + 0.5) * 255,
+                    ((b / 255 - 0.5) * level + 0.5) * 255,
                     a
                 ];
             }, options);
@@ -667,9 +667,9 @@
 
             return this.process(function(r, g, b, a) {
                 return [
-                    r * options.value, 
-                    g * options.value, 
-                    b * options.value, 
+                    r * options.value,
+                    g * options.value,
+                    b * options.value,
                     a
                 ];
             }, options);
@@ -679,9 +679,9 @@
         /**
          * --------------------------------------------------------------------------------
          *            HELPERS
-         * -------------------------------------------------------------------------------- 
+         * --------------------------------------------------------------------------------
          */
-        
+
         rgb2hsl: function(r, g, b) {
             r /= 255;
             g /= 255;
@@ -746,7 +746,7 @@
 
         gaussian: function(x, mu, sigma) {
             return Math.exp( -(((x-mu)/(sigma))*((x-mu)/(sigma)))/2.0 );
-        },   
+        },
     });
 
     // A really lightweight plugin wrapper around the constructor,

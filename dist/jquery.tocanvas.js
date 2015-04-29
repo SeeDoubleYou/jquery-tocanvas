@@ -89,7 +89,7 @@
                     tc.setup();
                     tc.render();
                 });
-                tc.$element.trigger("play");
+                //tc.$element.trigger("play");
             }
             else {
                 return false; //incorrect source

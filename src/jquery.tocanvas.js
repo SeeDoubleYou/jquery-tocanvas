@@ -77,11 +77,11 @@
             }
             else if(tc.$element.is("video")) {
                 tc.imageObj = tc.element;
+                tc.setup();
                 tc.$element.on("play", function() {
-                    tc.setup();
                     tc.render();
                 });
-                tc.$element.trigger("play");
+                //tc.$element.trigger("play");
             }
             else {
                 return false; //incorrect source

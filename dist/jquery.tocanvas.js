@@ -6,22 +6,6 @@
  *  Made by Cees-Willem Hofstede
  *  Under MIT License
  */
-/*
- *  jquery-tocanvas - v0.1.0
- *  A jquery plugin to overlay any img with a canvas to add effects to it
- *  http://seedoubleyou.nl
- *
- *  Made by Cees-Willem Hofstede
- *  Under MIT License
- */
-/*
- *  jquery-tocanvas - v0.1.0
- *  A jquery plugin to overlay any img with a canvas to add effects to it
- *  http://seedoubleyou.nl
- *
- *  Made by Cees-Willem Hofstede
- *  Under MIT License
- */
 // the semi-colon before function invocation is a safety net against concatenated
 // scripts and/or other plugins which may not be closed properly.
 ;(function ( $, window, document, undefined ) {
@@ -85,8 +69,8 @@
             }
             else if(tc.$element.is("video")) {
                 tc.imageObj = tc.element;
+                tc.setup();
                 tc.$element.on("play", function() {
-                    tc.setup();
                     tc.render();
                 });
                 //tc.$element.trigger("play");
@@ -512,6 +496,7 @@
             var cm = Math.floor(cols/2); // center of column (current pixel)
 
             return tc.process(function(r, g, b, a, x, y, i) {
+
                 var nR = options.updateR ? 0 : tc.pixelsIn[i  ],
                     nG = options.updateG ? 0 : tc.pixelsIn[i+1],
                     nB = options.updateB ? 0 : tc.pixelsIn[i+2]

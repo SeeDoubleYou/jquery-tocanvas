@@ -1,19 +1,3 @@
-/*
- *  jquery-tocanvas - v0.1.0
- *  A jquery plugin to overlay any img with a canvas to add effects to it
- *  http://seedoubleyou.nl
- *
- *  Made by Cees-Willem Hofstede
- *  Under MIT License
- */
-/*
- *  jquery-tocanvas - v0.1.0
- *  A jquery plugin to overlay any img with a canvas to add effects to it
- *  http://seedoubleyou.nl
- *
- *  Made by Cees-Willem Hofstede
- *  Under MIT License
- */
 // the semi-colon before function invocation is a safety net against concatenated
 // scripts and/or other plugins which may not be closed properly.
 ;(function ( $, window, document, undefined ) {

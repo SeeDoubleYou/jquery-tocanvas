@@ -44,7 +44,7 @@
         this.settings = $.extend( {}, defaults, options );
         this._defaults = defaults;
         this._name = pluginName;
-        return this.init();
+        return this._init();
     }
 
     // Avoid Plugin.prototype conflicts
@@ -55,7 +55,7 @@
          *
          * @return {obj}    this
          */
-        init: function () {
+        _init: function () {
             var tc = this; // tc stands for ToCanvas and is used as a context var throughout the plugins methods
 
             // if the element is an image, create an image object with the same source.
@@ -64,7 +64,7 @@
             if(tc.$element.is("img")) {
                 tc.imageObj = new Image();
                 tc.imageObj.onload = function() {
-                    tc.setup();
+                    tc._setup();
                     tc.render();
                 };
                 tc.imageObj.src = this.$element.attr("src");
@@ -74,7 +74,7 @@
             // Then run the setup, and make sure the canvas is render when the video starts to play
             else if(tc.$element.is("video")) {
                 tc.imageObj = tc.element;
-                tc.setup();
+                tc._setup();
                 tc.$element.on("play", function() {
                     tc.render();
                 });
@@ -96,7 +96,7 @@
          *
          * @return {obj}    this
          */
-        setup: function() {
+        _setup: function() {
             var tc = this;
             tc.w = tc.$element.width();
             tc.h = tc.$element.height();
@@ -161,6 +161,7 @@
 
         /**
          * Render all effects, overlays, filters, etc.
+         * Called automatically by the plugin, but you can use this for custom functionality
          *
          * @return {obj}    this
          */
@@ -192,6 +193,7 @@
 
         /**
          * Draw the contents of this.element to canvas en reset internal pixel data
+         * Called by the {@link plugin#render} method, but you can use this for custom functionality
          *
          * @return {obj}    this
          */
@@ -210,6 +212,7 @@
 
         /**
          * draw the current pixel-data to the canvas and read the new pixel information from result
+         * Called by the {@link process#processcallback} method, but you can use this for custom functionality
          *
          * @return {obj}    this
          */
@@ -226,7 +229,8 @@
 
         /**
          * Process a callback for each pixel.
-         * We loop over all pixels and call the callback for each
+         * We loop over all pixels and call the callback for each.
+         * This function is used by all processed effects
          *
          * @param  {function} callback The callback must return an array [r, g, b, a]
          * @return {obj}      this
@@ -810,6 +814,13 @@
          * --------------------------------------------------------------------------------
          */
 
+        /**
+         * Convert an RGB tuplet to HSL
+         * @param  {int}  r  Red component   [0-255]
+         * @param  {int}  g  Green component [0-255]
+         * @param  {int}  b  Blue component  [0-255]
+         * @return {obj}     HSL (object {h, s, l})
+         */
         rgb2hsl: function(r, g, b) {
             r /= 255;
             g /= 255;
@@ -845,6 +856,13 @@
             };
         },
 
+        /**
+         * Convert an HSL tuplet to RGB
+         * @param  {int}  h  Hue component          [0-1]
+         * @param  {int}  s  Saturation component   [0-1]
+         * @param  {int}  l  Lightness component    [0-1]
+         * @return {obj}     RGB (object {r, g, b})
+         */
         hsl2rgb: function(h, s, l) {
             var r, g, b;
             if (s === 0) {
@@ -863,6 +881,13 @@
             };
         },
 
+        /**
+         * Convert a hue to an RGB component
+         * @param  {int}    p
+         * @param  {int}    q
+         * @param  {int}    t
+         * @return {int}    p
+         */
         hue2rgb: function(p, q, t) {
             if (t < 0) { t += 1; }
             if (t > 1) { t -= 1; }
@@ -872,6 +897,13 @@
             return p;
         },
 
+        /**
+         * 1D Gaussian function
+         * @param  {float} x
+         * @param  {float} mu
+         * @param  {float} sigma
+         * @return {float} gaussian
+         */
         gaussian: function(x, mu, sigma) {
             return Math.exp( -(((x-mu)/(sigma))*((x-mu)/(sigma)))/2.0 );
         },

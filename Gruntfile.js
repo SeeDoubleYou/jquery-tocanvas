@@ -19,12 +19,16 @@ module.exports = function(grunt) {
 
 		// Concat definitions
 		concat: {
-			options: {
-				banner: "<%= meta.banner %>"
-			},
 			dist: {
+				options: {
+					banner: "<%= meta.banner %>"
+				},
 				src: ["src/jquery.tocanvas.js"],
 				dest: "dist/jquery.tocanvas.js"
+			},
+			readme: {
+				src: ["docs/banner.md", "docs/src/jquery.tocanvas.md"],
+				dest: "README.md"
 			}
 		},
 
@@ -58,12 +62,11 @@ module.exports = function(grunt) {
 		jsdox: {
 		    generate: {
 				options: {
-					contentsEnabled: true,
-					contentsTitle: 'Documentation',
+					contentsEnabled: false,
 				},
 
 				src: ['src/jquery.tocanvas.js'],
-				dest: 'docs/md'
+				dest: 'docs'
 		    },
 		}
 	});
@@ -74,9 +77,9 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks("grunt-contrib-watch");
 	grunt.loadNpmTasks('grunt-jsdox');
 
-	grunt.registerTask("build", ["concat", "uglify"]);
-	grunt.registerTask("default", ["jshint", "build"]);
+	grunt.registerTask("build", ["concat:dist", "uglify"]);
 	grunt.registerTask("travis", ["default"]);
-	grunt.registerTask("doc", ["jsdox:generate"]);
+	grunt.registerTask("doc", ["jsdox:generate", "concat:readme"]);
+	grunt.registerTask("default", ["jshint", "build", "doc"]);
 
 };

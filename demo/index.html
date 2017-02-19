@@ -27,8 +27,8 @@
 					<li><a href="#example-hsl">HSL Colorization</a></li>
 					<li>Noise (random)</li>
 					<li>Pixelate</li>
-					<li>Blur</li>
-					<li>Box blur</li>
+					<li><a href="#example-blur">Blur</a></li>
+					<li><a href="#example-boxblur">Box blur</a></li>
 					<li><a href="#example-gaussianblur">Gaussian blur</a></li>
 					<li><a href="#example-customconvolution">Custom covolution filters</a></li>
 					<li>Sharpen</li>
@@ -112,7 +112,7 @@ $(".toCanvas-hsl").toCanvas({
 
 			<!-- --------------------------------------------------------------- -->
 
-			<div class="example" id="example-gaussianblur">
+			<div class="example" id="example-blur">
 				<h2>Blur</h2>
 				<p>
 					Blur effect using 3x3 neighborhood
@@ -126,15 +126,15 @@ $(".toCanvas-hsl").toCanvas({
 $(".toCanvas-gauss").toCanvas({
 	hoverOpacity: 0,
 	process: [
-			{ blur: {} }
+			{ blur }
 		]
 	});</code></pre>
-					<img src="ny_view.jpg" class="toCanvas-boxblur" />
+					<img src="ny_view.jpg" class="toCanvas-blur" />
 				</div>
 
 			<!-- --------------------------------------------------------------- -->
 
-			<div class="example" id="example-gaussianblur">
+			<div class="example" id="example-boxblur">
 				<h2>Box Blur</h2>
 				<p>
 					Simple Box Blur effect
@@ -337,7 +337,7 @@ $('#pg-opacity-slider').slider({
 				$(".toCanvas-blur").toCanvas({
 					hoverOpacity: 0,
 					process: [
-						{ blur: {  } }
+						{ blur }
 					]
 				});
 

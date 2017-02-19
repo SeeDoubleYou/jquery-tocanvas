@@ -423,11 +423,15 @@
          * @return {array} r, g, b, a
          */
         blur: function(options) {
-            return this.convolutionFilter([
-                [0.1, 0.1, 0.1],
-                [0.1, 0.2, 0.1],
-                [0.1, 0.1, 0.1]
-            ], options);
+            options = $.extend({}, {
+                filter: [
+                    [0.1, 0.1, 0.1],
+                    [0.1, 0.2, 0.1],
+                    [0.1, 0.1, 0.1]
+                ]
+            }, options);
+
+            return this.convolutionFilter(options);
         },
 
         /**
@@ -452,7 +456,11 @@
                 filter.push(row);
             }
 
-            return this.convolutionFilter(filter, options);
+            options = $.extend({}, {
+                filter: filter
+            }, options);
+
+            return this.convolutionFilter(options);
         },
 
         /**

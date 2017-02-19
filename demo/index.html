@@ -113,6 +113,45 @@ $(".toCanvas-hsl").toCanvas({
 			<!-- --------------------------------------------------------------- -->
 
 			<div class="example" id="example-gaussianblur">
+				<h2>Blur</h2>
+				<p>
+					Blur effect using 3x3 neighborhood
+				</p>
+				<pre>
+0.1  0.1  0.1
+0.1  0.2  0.1
+0.1  0.1  0.1
+				</pre>
+				<pre><code class="language-javascript">
+$(".toCanvas-gauss").toCanvas({
+	hoverOpacity: 0,
+	process: [
+			{ blur: {} }
+		]
+	});</code></pre>
+					<img src="ny_view.jpg" class="toCanvas-boxblur" />
+				</div>
+
+			<!-- --------------------------------------------------------------- -->
+
+			<div class="example" id="example-gaussianblur">
+				<h2>Box Blur</h2>
+				<p>
+					Simple Box Blur effect
+				</p>
+				<pre><code class="language-javascript">
+$(".toCanvas-gauss").toCanvas({
+	hoverOpacity: 0,
+	process: [
+		{ boxBlur: { radius: 10} }
+	]
+});</code></pre>
+				<img src="ny_view.jpg" class="toCanvas-boxblur" />
+			</div>
+
+			<!-- --------------------------------------------------------------- -->
+
+			<div class="example" id="example-gaussianblur">
 				<h2>Gaussian Blur</h2>
 				<p>
 					You can use convolution filters as well. Some come with toCanvas built in, like a gaussian filter.
@@ -295,10 +334,24 @@ $('#pg-opacity-slider').slider({
 					]
 				});
 
+				$(".toCanvas-blur").toCanvas({
+					hoverOpacity: 0,
+					process: [
+						{ blur: {  } }
+					]
+				});
+
+				$(".toCanvas-boxblur").toCanvas({
+					hoverOpacity: 0,
+					process: [
+						{ boxBlur: { radius: 10 } }
+					]
+				});
+
 				$(".toCanvas-gauss").toCanvas({
 					hoverOpacity: 0,
 					process: [
-						{ gaussianBlur: { radius: 10} }
+						{ gaussianBlur: { radius: 10 } }
 					]
 				});
 
